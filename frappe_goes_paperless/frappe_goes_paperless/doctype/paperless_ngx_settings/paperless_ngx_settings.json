@@ -36,18 +36,20 @@
   {
    "fieldname": "sync_suppliers_to_correspondents",
    "fieldtype": "Button",
-   "label": "Sync Suppliers to Correspondents"
+   "label": "Sync Suppliers to Correspondents",
+   "options": "sync_suppliers"
   },
   {
    "fieldname": "sync_customers_to_correspondents",
    "fieldtype": "Button",
-   "label": "Sync Customers to Correspondents"
+   "label": "Sync Customers to Correspondents",
+   "options": "sync_customers"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-08-07 11:46:50.146304",
+ "modified": "2024-08-07 13:10:18.717867",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless-ngx Settings",
