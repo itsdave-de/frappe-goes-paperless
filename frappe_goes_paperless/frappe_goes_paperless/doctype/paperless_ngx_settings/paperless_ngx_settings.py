@@ -7,9 +7,11 @@ import requests
 
 
 class PaperlessngxSettings(Document):
+    @frappe.whitelist()
     def sync_suppliers(self):
         sync_suppliers()
 
+    @frappe.whitelist()
     def sync_customers(self):
         sync_customers()
 
