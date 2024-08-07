@@ -30,14 +30,18 @@ def sync_customers():
         data = {
             "name": correspondent_name,
             "match": "",
-            "matching_algorithm": 3,
+            "matching_algorithm": 6,
+            "owner": 3,
             "is_insensitive": False,
         }
 
         response = requests.post(
             f"{server_url}/api/correspondents/",
             json=data,
-            headers={"Authorization": f"Token {api_token}"}
+            headers={
+                "Authorization": f"Token {api_token}",
+                "Content-Type": "application/json"
+            }
         )
 
         if response.status_code == 201:
@@ -56,15 +60,19 @@ def sync_suppliers():
         correspondent_name = f"{supplier.supplier_name} {supplier.name}"
         data = {
             "name": correspondent_name,
-            "match": correspondent_name,
-            "matching_algorithm": 3,
+            "match": "",
+            "matching_algorithm": 6,
+            "owner": 3,
             "is_insensitive": False,
         }
 
         response = requests.post(
             f"{server_url}/api/correspondents/",
             json=data,
-            headers={"Authorization": f"Token {api_token}"}
+            headers={
+                "Authorization": f"Token {api_token}",
+                "Content-Type": "application/json"
+            }
         )
 
         if response.status_code == 201:
