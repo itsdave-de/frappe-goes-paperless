@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils.password import get_decrypted_password
 import requests
 
 
@@ -17,8 +18,14 @@ class PaperlessngxSettings(Document):
 
 
 def get_paperless_settings():
-    settings = frappe.get_single('Paperless-ngx Settings')
-    return settings.paperless_ngx_server, settings.api_token
+    settings = frappe.get_doc('Paperless-ngx Settings', 'Paperless-ngx Settings')
+    api_token = get_decrypted_password(
+        doctype='Paperless-ngx Settings',
+        name='Paperless-ngx Settings',
+        fieldname='api_token',
+        raise_exception=False
+    )
+    return settings.paperless_ngx_server, api_token
 
 @frappe.whitelist()
 def sync_customers():
