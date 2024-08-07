@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-08-07 10:43:47.959940",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "server_settings_section",
+  "paperless_ngx_server",
+  "api_token",
+  "functions_section",
+  "sync_suppliers_to_correspondents",
+  "sync_customers_to_correspondents"
+ ],
+ "fields": [
+  {
+   "fieldname": "server_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Server Settings"
+  },
+  {
+   "fieldname": "paperless_ngx_server",
+   "fieldtype": "Data",
+   "label": "Paperless-ngx Server"
+  },
+  {
+   "fieldname": "api_token",
+   "fieldtype": "Password",
+   "label": "API Token"
+  },
+  {
+   "fieldname": "functions_section",
+   "fieldtype": "Section Break",
+   "label": "Functions"
+  },
+  {
+   "fieldname": "sync_suppliers_to_correspondents",
+   "fieldtype": "Button",
+   "label": "Sync Suppliers to Correspondents"
+  },
+  {
+   "fieldname": "sync_customers_to_correspondents",
+   "fieldtype": "Button",
+   "label": "Sync Customers to Correspondents"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-08-07 11:46:50.146304",
+ "modified_by": "Administrator",
+ "module": "Frappe Goes Paperless",
+ "name": "Paperless-ngx Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
