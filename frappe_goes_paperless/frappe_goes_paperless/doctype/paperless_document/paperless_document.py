@@ -112,7 +112,10 @@ def get_ai_data(self):
 		model="chatgpt-4o-latest",
 	)
 	resp = chat_completion.choices[0].message.content.strip()
-	self.ai_response = resp
+	# update doctype
+	doc = frappe.get_doc("Paperless Document", self.name)
+	
+	doc.ai_response = resp
 	json_pattern = r'\{.*\}'
 	matches = re.findall(json_pattern, resp, re.DOTALL)
 	if matches:
@@ -120,13 +123,14 @@ def get_ai_data(self):
 		try:
 			data = json.loads(json_content)
 			formatted_json = json.dumps(data, indent=2)
-			self.ai_response_json = formatted_json
+			doc.ai_response_json = formatted_json
 		except json.JSONDecodeError as e:
-			self.ai_response_json = f"Error on decode JSON: {e}"
+			doc.ai_response_json = f"Error on decode JSON: {e}"
 	else:
-		self.ai_response_json = 'The content is not in JSON format'
-	self.status = 'AI-Response-Recieved'
-	self.save()
+		doc.ai_response_json = 'The content is not in JSON format'
+	doc.status = 'AI-Response-Recieved'
+	doc.save()
+	frappe.db.commit()
 	frappe.publish_realtime('msgprint', 'Response received successfully, fields updated!')
 	print('Response received successfully, fields updated!')
 
