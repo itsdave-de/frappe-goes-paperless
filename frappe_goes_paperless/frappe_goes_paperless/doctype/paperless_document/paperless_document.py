@@ -73,11 +73,15 @@ def paperless_api(place, id):
 			return response.json()
 	return None
 
+
 class PaperlessDocument(Document):
-	@frappe.whitelist()
-	def button_get_ai(self):
-		frappe.show_alert('Starting query in AI...')
-		frappe.enqueue(get_ai_data, queue='short', self=self)
+	pass
+
+
+@frappe.whitelist()
+def button_get_ai(doc):
+	frappe.show_alert('Starting query in AI...')
+	frappe.enqueue(get_ai_data, queue='short', self=doc)
 
 
 def get_ai_data(self):

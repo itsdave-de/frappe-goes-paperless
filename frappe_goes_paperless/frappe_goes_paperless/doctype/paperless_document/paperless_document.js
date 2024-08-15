@@ -6,7 +6,8 @@ frappe.ui.form.on("Paperless Document", {
         frm.get_field('get_ai_data').onclick = function() {
             frappe.show_alert('Starting query in AI...');
             frappe.call({
-                method: 'button_get_ai'
+                method: 'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.button_get_ai',
+                args: { doc: frm.doc },
             });
         };
     }
