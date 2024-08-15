@@ -50,7 +50,7 @@ class PaperlessDocument(Document):
 		# get prompt
 		prompt = frappe.get_doc("AI Prompt", self.get('ai_prompt'), fields=['long_text_fnbe'])
 		# concat fulltext and prompt
-		prompt = f"{get_paperless_fulltext(self.get('paperless_document_id'))}\n{prompt}"
+		prompt = f"{get_paperless_fulltext(self.get('paperless_document_id'))}\n\n{prompt}"
 		# init chat
 		chat_completion = client.chat.completions.create(
 			messages=[
