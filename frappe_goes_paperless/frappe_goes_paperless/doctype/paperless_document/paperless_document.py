@@ -117,7 +117,7 @@ def get_ai_data(self):
 		self.ai_response_json = 'The content is not in JSON format'
 	self.status = 'AI-Response-Recieved'
 	self.save()
-	frappe.show_alert('Response received successfully, fields updated!')
+	##frappe.msgprint('Response received successfully, fields updated!')
 
 
 @frappe.whitelist()
