@@ -4,6 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils.password import get_decrypted_password
+from frappe.utils.background_jobs import get_job_status
 import requests
 import re
 import json
@@ -84,9 +85,18 @@ def button_get_ai(doc):
 	jobId = frappe.enqueue(
 		'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.get_ai_data',
 		queue = 'short',
+		now = True,
 		self = doc
 	)
 	return jobId.id
+
+
+@frappe.whitelist()
+def job_status(jobid):
+	jobStatus = get_job_status(jobid)
+	print(jobStatus)
+	return jobStatus
+
 
 
 def get_ai_data(self):

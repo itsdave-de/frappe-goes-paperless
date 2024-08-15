@@ -21,9 +21,9 @@ frappe.ui.form.on("Paperless Document", {
 
 function verificarStatusJob(jobId) {
     frappe.call({
-        method: "frappe.utils.background_jobs.get_job_status",
+        method: "frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.job_status",
         args: {
-            job_id: jobId
+            jobid: jobId
         },
         callback: function(response) {
             if (response.message) {
