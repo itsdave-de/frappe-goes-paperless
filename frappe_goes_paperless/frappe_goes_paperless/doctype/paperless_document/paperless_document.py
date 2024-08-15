@@ -123,11 +123,13 @@ def sync_documents():
 			new_doc = frappe.get_doc({
 				"doctype": "Paperless Document",
 				"paperless_document_id": id,
-				"paperless_correspondent": paperless_api('correspondents', get_document['correspondent']['name']),
-				"paperless_documenttype": paperless_api('document_types', get_document['document_type']['name']),
+				"paperless_correspondent": paperless_api('correspondents', get_document['correspondent'])['name'],
+				"paperless_documenttype": paperless_api('document_types', get_document['document_type'])['name'],
 				"status": "new"
 			})
 			new_doc.insert()
+			frappe.db.commit()
+			print(f"Document added -> {get_document['title']}")
 		except Exception as e:
 			# Handle HTTP errors
 			frappe.log_error(
