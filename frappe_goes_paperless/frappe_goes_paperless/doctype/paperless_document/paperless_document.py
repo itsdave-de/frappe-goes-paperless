@@ -68,7 +68,7 @@ class PaperlessDocument(Document):
 		json_pattern = r'\{.*\}'
 		matches = re.findall(json_pattern, resp, re.DOTALL)
 		if matches:
-			json_content = matches
+			json_content = matches[0]
 			try:
 				data = json.loads(json_content)
 				formatted_json = json.dumps(data, indent=2)
