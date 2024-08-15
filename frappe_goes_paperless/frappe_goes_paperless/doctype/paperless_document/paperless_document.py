@@ -44,6 +44,35 @@ def get_paperless_fulltext(document_id):
 	return None
 
 
+def get_paperless_ids():
+	server_url, api_token = get_paperless_settings()
+	response = requests.get(
+        f"{server_url.rstrip('/')}/api/documents/",
+        headers = {
+			"Authorization": f"Token {api_token}",
+			"Content-Type": "application/json"
+		}
+	)
+	if response.status_code == 200:
+		if len(response.json()) > 0:
+			return response.json()['all']
+	return None
+
+# Get data from paperless-ngx
+def paperless_api(place, id):
+	server_url, api_token = get_paperless_settings()
+	response = requests.get(
+        f"{server_url.rstrip('/')}/api/{place}/{id}/",
+        headers = {
+			"Authorization": f"Token {api_token}",
+			"Content-Type": "application/json"
+		}
+	)
+	if response.status_code == 200:
+		if len(response.json()) > 0:
+			return response.json()
+	return None
+
 class PaperlessDocument(Document):
 	@frappe.whitelist()
 	def get_ai_data(self):
@@ -78,3 +107,29 @@ class PaperlessDocument(Document):
 		else:
 			self.ai_response_json = 'The content is not in JSON format'
 		self.save()
+
+
+@frappe.whitelist()
+def sync_documents():
+	# Get all ids from paperless
+	ids = get_paperless_ids()
+	# get all ids from frappe
+	docs = frappe.get_all('Paperless Document', fields=['paperless_document_id'])
+	# Get a array with missing ids (compare the two lists of ids)
+	mis = list(set(ids) - set([int(id['paperless_document_id']) for id in docs]))
+	for id in mis:
+		try:
+			get_document = paperless_api('documents', id)
+			new_doc = frappe.get_doc({
+				"doctype": "Paperless Document",
+				"paperless_document_id": id,
+				"paperless_correspondent": paperless_api('correspondents', get_document['correspondent']),
+				"paperless_documenttype": paperless_api('document_types', get_document['document_type']),
+				"status": "new"
+			})
+			new_doc.insert()
+		except Exception as e:
+			# Handle HTTP errors
+			frappe.log_error(
+				f"Failed to fetch documents from Paperless-ngx: {e}"
+			)
