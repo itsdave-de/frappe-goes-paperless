@@ -121,12 +121,36 @@ def sync_documents():
 	for id in mis:
 		try:
 			get_document = paperless_api('documents', id)
+			# Get frappe doctype by Paperless doctype
+			paperless_doctype = paperless_api('document_types', get_document['document_type'])['name']
+			frappe_doctype = frappe.get_all(
+				'Paperless Document Type Mapping',
+				fields = ['frappe_doctype'],
+				filters = {'paperless_document_type': paperless_doctype}
+			)
+			if len(frappe_doctype) > 0:
+				frappe_doctype = frappe_doctype[0]['frappe_doctype']
+			else:
+				frappe_doctype = None
+			# Get prompt from frappe doctype
+			frappe_prompt = frappe.get_all(
+				'AI Prompt',
+				fields = ['name'],
+				filters = {'for_doctype': frappe_doctype}
+			)
+			if len(frappe_prompt) > 0:
+				frappe_prompt = frappe_prompt[0]['name']
+			else:
+				frappe_prompt = None
+			# add document
 			new_doc = frappe.get_doc({
 				"doctype": "Paperless Document",
 				"paperless_document_id": id,
 				"paperless_correspondent": paperless_api('correspondents', get_document['correspondent'])['name'],
-				"paperless_documenttype": paperless_api('document_types', get_document['document_type'])['name'],
-				"status": "new"
+				"paperless_documenttype": paperless_doctype,
+				"status": "new",
+				"frappe_doctype": frappe_doctype,
+				"ai_prompt": frappe_prompt
 			})
 			new_doc.insert()
 			frappe.db.commit()
