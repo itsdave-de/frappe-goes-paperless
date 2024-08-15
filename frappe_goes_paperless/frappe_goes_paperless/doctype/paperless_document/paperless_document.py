@@ -74,40 +74,46 @@ def paperless_api(place, id):
 	return None
 
 class PaperlessDocument(Document):
-	@frappe.whitelist()
-	def get_ai_data(self):
-		client = OpenAI(api_key = get_ai_settings())
+	def button_get_ai(self):
+		frappe.msgprint('Starting query in AI...')
+		frappe.enqueue(get_ai_data, queue='short', self=self)
 
-		# get prompt
-		prompt = frappe.get_doc("AI Prompt", self.get('ai_prompt'), fields=['long_text_fnbe'])
-		# concat fulltext and prompt
-		prompt = f"{get_paperless_fulltext(self.get('paperless_document_id'))}\n\n{prompt.long_text_fnbe}"
-		# init chat
-		chat_completion = client.chat.completions.create(
-			messages=[
-				{
-					"role": "user",
-					"content": prompt,
-				}
-			],
-			model="chatgpt-4o-latest",
-		)
-		resp = chat_completion.choices[0].message.content.strip()
-		self.ai_response = resp
-		json_pattern = r'\{.*\}'
-		matches = re.findall(json_pattern, resp, re.DOTALL)
-		if matches:
-			json_content = matches[0]
-			try:
-				data = json.loads(json_content)
-				formatted_json = json.dumps(data, indent=2)
-				self.ai_response_json = formatted_json
-			except json.JSONDecodeError as e:
-				self.ai_response_json = f"Error on decode JSON: {e}"
-		else:
-			self.ai_response_json = 'The content is not in JSON format'
-		self.status = 'AI-Response-Recieved'
-		self.save()
+
+@frappe.whitelist()
+def get_ai_data(self):
+	client = OpenAI(api_key = get_ai_settings())
+
+	# get prompt
+	prompt = frappe.get_doc("AI Prompt", self.get('ai_prompt'), fields=['long_text_fnbe'])
+	# concat fulltext and prompt
+	prompt = f"{get_paperless_fulltext(self.get('paperless_document_id'))}\n\n{prompt.long_text_fnbe}"
+	# init chat
+	chat_completion = client.chat.completions.create(
+		messages=[
+			{
+				"role": "user",
+				"content": prompt,
+			}
+		],
+		model="chatgpt-4o-latest",
+	)
+	resp = chat_completion.choices[0].message.content.strip()
+	self.ai_response = resp
+	json_pattern = r'\{.*\}'
+	matches = re.findall(json_pattern, resp, re.DOTALL)
+	if matches:
+		json_content = matches[0]
+		try:
+			data = json.loads(json_content)
+			formatted_json = json.dumps(data, indent=2)
+			self.ai_response_json = formatted_json
+		except json.JSONDecodeError as e:
+			self.ai_response_json = f"Error on decode JSON: {e}"
+	else:
+		self.ai_response_json = 'The content is not in JSON format'
+	self.status = 'AI-Response-Recieved'
+	self.save()
+	frappe.msgprint('Response received successfully, fields updated!')
 
 
 @frappe.whitelist()
