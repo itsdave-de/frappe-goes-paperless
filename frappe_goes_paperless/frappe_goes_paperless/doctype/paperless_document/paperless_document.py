@@ -94,6 +94,8 @@ def get_ai_data(self):
 
 	client = OpenAI(api_key = get_ai_settings())
 
+	print(self)
+
 	# get prompt
 	prompt = frappe.get_doc("AI Prompt", self.get('ai_prompt'), fields=['long_text_fnbe'])
 	# concat fulltext and prompt
