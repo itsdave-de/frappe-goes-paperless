@@ -74,7 +74,7 @@ class PaperlessDocument(Document):
 				formatted_json = json.dumps(data, indent=2)
 				self.ai_response_json = formatted_json
 			except json.JSONDecodeError as e:
-				print("Error on decode JSON:", e)
+				self.ai_response_json = f"Error on decode JSON: {e}"
 		else:
-			self.ai_response_json = 'Content not is a json format'
+			self.ai_response_json = 'The content is not in JSON format'
 		self.save()
