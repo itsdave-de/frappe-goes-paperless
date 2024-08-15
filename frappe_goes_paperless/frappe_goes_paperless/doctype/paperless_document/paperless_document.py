@@ -81,11 +81,12 @@ class PaperlessDocument(Document):
 @frappe.whitelist()
 def button_get_ai(doc):
 	print('Starting function to get ai ...')
-	frappe.enqueue(
+	jobId = frappe.enqueue(
 		'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.get_ai_data',
 		queue = 'short',
 		self = doc
 	)
+	return jobId.id
 
 
 def get_ai_data(self):
