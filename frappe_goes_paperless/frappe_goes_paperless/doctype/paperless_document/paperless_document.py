@@ -113,7 +113,7 @@ def get_ai_data(self):
 	)
 	resp = chat_completion.choices[0].message.content.strip()
 	# update doctype
-	doc = frappe.get_doc("Paperless Document", self.name)
+	doc = frappe.get_doc("Paperless Document", self.get('name'))
 	
 	doc.ai_response = resp
 	json_pattern = r'\{.*\}'
