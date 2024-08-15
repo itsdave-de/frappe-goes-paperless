@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "PPLDOC-.######",
+ "autoname": "format:PPLDOC-{#####}",
  "creation": "2024-08-14 16:39:07.413555",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,6 +9,7 @@
   "paperless_document_id",
   "paperless_correspondent",
   "paperless_documenttype",
+  "status",
   "frappe_doctype",
   "ai_prompt",
   "get_ai_data",
@@ -50,22 +51,29 @@
   {
    "fieldname": "get_ai_data",
    "fieldtype": "Button",
-   "label": "Get AI Data"
+   "label": "Get AI Data",
+   "options": "get_ai_data"
   },
   {
    "fieldname": "ai_prompt",
    "fieldtype": "Link",
    "label": "AI Prompt",
    "options": "AI Prompt"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "new\nAI-Response-Recieved"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-14 16:58:18.287089",
+ "modified": "2024-08-15 12:47:59.119381",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
