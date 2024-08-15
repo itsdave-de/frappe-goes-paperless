@@ -93,7 +93,7 @@ def get_ai_data(self):
 	frappe.publish_realtime('msgprint', 'Starting query in AI...')
 
 	client = OpenAI(api_key = get_ai_settings())
-
+	self = json.loads(self)
 	print(self)
 	print(type(self))
 
