@@ -106,6 +106,7 @@ class PaperlessDocument(Document):
 				self.ai_response_json = f"Error on decode JSON: {e}"
 		else:
 			self.ai_response_json = 'The content is not in JSON format'
+		self.status = 'AI-Response-Recieved'
 		self.save()
 
 
