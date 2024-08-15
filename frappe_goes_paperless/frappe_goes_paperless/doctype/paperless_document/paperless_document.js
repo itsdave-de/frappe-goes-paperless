@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Paperless Document", {
-    onload: function(frm) {
+    refresh: function(frm) {
         frm.fields_dict['get_ai_data'].df.on_click = function() {
             frappe.show_alert('Starting query in AI...');
             frappe.call({
