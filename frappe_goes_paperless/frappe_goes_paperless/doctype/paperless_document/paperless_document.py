@@ -86,6 +86,7 @@ def button_get_ai(doc):
 
 def get_ai_data(self):
 	print('Initiate get ai data ...')
+	frappe.publish_realtime('msgprint', 'Starting query in AI...')
 
 	client = OpenAI(api_key = get_ai_settings())
 
@@ -119,6 +120,7 @@ def get_ai_data(self):
 		self.ai_response_json = 'The content is not in JSON format'
 	self.status = 'AI-Response-Recieved'
 	self.save()
+	frappe.publish_realtime('msgprint', 'Response received successfully, fields updated!')
 	print('Response received successfully, fields updated!')
 
 
