@@ -81,7 +81,11 @@ class PaperlessDocument(Document):
 @frappe.whitelist()
 def button_get_ai(doc):
 	#frappe.show_alert('Starting query in AI...')
-	frappe.enqueue(get_ai_data, queue='short', self=doc)
+	frappe.enqueue(
+		'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.get_ai_data',
+		queue = 'short',
+		self = doc
+	)
 
 
 def get_ai_data(self):
