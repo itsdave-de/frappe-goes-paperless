@@ -54,7 +54,7 @@
    "fieldname": "get_ai_data",
    "fieldtype": "Button",
    "label": "Get AI Data",
-   "options": "get_ai_data"
+   "options": "button_get_ai"
   },
   {
    "fieldname": "ai_prompt",
@@ -72,7 +72,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-15 14:13:32.928521",
+ "modified": "2024-08-15 15:56:24.369764",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
