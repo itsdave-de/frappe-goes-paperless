@@ -11,6 +11,7 @@ frappe.ui.form.on("Paperless Document", {
                 callback: function(response) {
                     if (response.message) {
                         const jobId = response.message;
+                        console.log('jobid -> ' + jobId);
                         verificarStatusJob(jobId);
                     }
                 }
@@ -27,7 +28,8 @@ function verificarStatusJob(jobId) {
         },
         callback: function(response) {
             if (response.message) {
-                const status = response.message.status;
+                const status = response.message;
+                console.log('Job status -> ' + status);
                 if (status === "finished") {
                     location.reload();
                 } else if (status === "failed") {
