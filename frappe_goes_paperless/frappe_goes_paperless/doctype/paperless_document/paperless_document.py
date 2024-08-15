@@ -30,14 +30,15 @@ def get_ai_settings():
 def get_paperless_fulltext(document_id):
 	server_url, api_token = get_paperless_settings()
 	response = requests.get(
-        f"{server_url.rstrip('/')}/api/documents/{document_id}",
-        headers={
+        f"{server_url.rstrip('/')}/api/documents/{document_id}/",
+        headers = {
 			"Authorization": f"Token {api_token}",
 			"Content-Type": "application/json"
-		})
+		}
+	)
 	if response.status_code == 200:
 		if len(response.json()) > 0:
-			return response.json()[0]['content']
+			return response.json()['content']
 	return None
 
 
