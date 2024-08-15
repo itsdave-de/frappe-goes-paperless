@@ -1,0 +1,87 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "PPLDOC-.######",
+ "creation": "2024-08-14 16:39:07.413555",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "paperless_document_id",
+  "paperless_correspondent",
+  "paperless_documenttype",
+  "frappe_doctype",
+  "ai_prompt",
+  "get_ai_data",
+  "ai_response",
+  "ai_response_json"
+ ],
+ "fields": [
+  {
+   "fieldname": "paperless_document_id",
+   "fieldtype": "Data",
+   "label": "Paperless Document ID"
+  },
+  {
+   "fieldname": "paperless_correspondent",
+   "fieldtype": "Data",
+   "label": "Paperless Correspondent"
+  },
+  {
+   "fieldname": "paperless_documenttype",
+   "fieldtype": "Data",
+   "label": "Paperless Documenttype"
+  },
+  {
+   "fieldname": "ai_response",
+   "fieldtype": "Long Text",
+   "label": "AI Response"
+  },
+  {
+   "fieldname": "ai_response_json",
+   "fieldtype": "Long Text",
+   "label": "AI Response JSON"
+  },
+  {
+   "fieldname": "frappe_doctype",
+   "fieldtype": "Link",
+   "label": "Frappe Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "get_ai_data",
+   "fieldtype": "Button",
+   "label": "Get AI Data"
+  },
+  {
+   "fieldname": "ai_prompt",
+   "fieldtype": "Link",
+   "label": "AI Prompt",
+   "options": "AI Prompt"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-08-14 16:58:18.287089",
+ "modified_by": "Administrator",
+ "module": "Frappe Goes Paperless",
+ "name": "Paperless Document",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
