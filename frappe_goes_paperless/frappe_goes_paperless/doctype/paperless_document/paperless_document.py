@@ -5,6 +5,8 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.password import get_decrypted_password
 import requests
+import re
+import json
 from openai import OpenAI
 
 
@@ -63,6 +65,16 @@ class PaperlessDocument(Document):
 		)
 		resp = chat_completion.choices[0].message.content.strip()
 		self.ai_response = resp
+		json_pattern = r'\{.*\}'
+		matches = re.findall(json_pattern, resp, re.DOTALL)
+		if matches:
+			json_content = matches
+			try:
+				data = json.loads(json_content)
+				formatted_json = json.dumps(data, indent=2)
+				self.ai_response_json = formatted_json
+			except json.JSONDecodeError as e:
+				print("Error on decode JSON:", e)
+		else:
+			self.ai_response_json = 'Content not is a json format'
 		self.save()
-
-
