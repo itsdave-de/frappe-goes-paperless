@@ -28,7 +28,7 @@ function verificarStatusJob(jobId) {
         callback: function(response) {
             if (response.message) {
                 const status = response.message.status;
-                if (status === "completed") {
+                if (status === "finished") {
                     location.reload();
                 } else if (status === "failed") {
                     frappe.msgprint(__('The job is failed'));
