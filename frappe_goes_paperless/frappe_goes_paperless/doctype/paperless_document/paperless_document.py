@@ -76,7 +76,7 @@ def paperless_api(place, id):
 class PaperlessDocument(Document):
 	@frappe.whitelist()
 	def button_get_ai(self):
-		frappe.msgprint('Starting query in AI...')
+		frappe.show_alert('Starting query in AI...')
 		frappe.enqueue(get_ai_data, queue='short', self=self)
 
 
@@ -113,7 +113,7 @@ def get_ai_data(self):
 		self.ai_response_json = 'The content is not in JSON format'
 	self.status = 'AI-Response-Recieved'
 	self.save()
-	frappe.msgprint('Response received successfully, fields updated!')
+	frappe.show_alert('Response received successfully, fields updated!')
 
 
 @frappe.whitelist()
