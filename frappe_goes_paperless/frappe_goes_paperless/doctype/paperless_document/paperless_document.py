@@ -50,7 +50,7 @@ class PaperlessDocument(Document):
 		# get prompt
 		prompt = frappe.get_doc("AI Prompt", self.get('ai_prompt'), fields=['long_text_fnbe'])
 		# concat fulltext and prompt
-		prompt = f"{get_paperless_fulltext(self.get('paperless_document_id'))}\n\n{prompt}"
+		prompt = f"{get_paperless_fulltext(self.get('paperless_document_id'))}\n\n{prompt.long_text_fnbe}"
 		# init chat
 		chat_completion = client.chat.completions.create(
 			messages=[
@@ -59,7 +59,7 @@ class PaperlessDocument(Document):
 					"content": prompt,
 				}
 			],
-			model="gpt-4",
+			model="chatgpt-4o-latest",
 		)
 		resp = chat_completion.choices[0].message.content.strip()
 		self.ai_response = resp
