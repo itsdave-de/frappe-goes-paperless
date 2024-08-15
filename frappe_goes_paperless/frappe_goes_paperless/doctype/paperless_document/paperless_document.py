@@ -59,7 +59,7 @@ class PaperlessDocument(Document):
 					"content": prompt,
 				}
 			],
-			model="chatgpt-4o-latest",
+			model="gpt-4-turbo",
 		)
 		resp = chat_completion.choices[0].message.content.strip()
 		self.ai_response = resp
