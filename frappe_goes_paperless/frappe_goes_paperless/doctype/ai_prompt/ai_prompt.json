@@ -25,12 +25,13 @@
   {
    "fieldname": "caption",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Caption"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-14 16:53:59.134179",
+ "modified": "2024-08-16 15:35:35.021294",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "AI Prompt",
