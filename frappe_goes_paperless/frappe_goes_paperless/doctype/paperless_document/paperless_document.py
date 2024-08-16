@@ -117,7 +117,7 @@ def button_get_ai(doc):
 @frappe.whitelist()
 def job_status(jobid):
 	getStatus = None
-	getJob = [(j.job_id, j.status) for j in frappe.get_all('RQ Job', filters={'job_id': jobid}) if j.job_id = jobid]
+	getJob = [(j.job_id, j.status) for j in frappe.get_all('RQ Job', filters={'job_id': jobid}) if j.job_id == jobid]
 	if getJob > 0:
 		for job_id, status for getJob:
 			if job_id == jobid:
