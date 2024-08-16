@@ -5,7 +5,6 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.password import get_decrypted_password
 from frappe.utils.background_jobs import get_job_status
-from frappe.utils.file_manager import save_file
 import requests
 import re
 import json
@@ -66,16 +65,21 @@ def get_paperless_docthumb(id, docname):
 	response = requests.get(
         f"{server_url.rstrip('/')}/api/documents/{id}/thumb/",
         headers = {
-			"Authorization": f"Token {api_token}",
-			"Content-Type": "image/webp"
+			"Authorization": f"Token {api_token}"
 		}
 	)
 	if response.status_code == 200:
 		if response.content:
-			file_name = f"docthumb-{id}.webp"
-			file_url = save_file(file_name, response.content, 'Paperless Document', docname)
-			print(file_url)
-			return file_url
+			file_doc = frappe.new_doc("File")
+			file_doc.file_name = f"docthumb-{id}.webp"
+			file_doc.attached_to_doctype = 'Paperless Document'
+			file_doc.content = response.content
+			file_doc.decode = False
+			file_doc.is_private = False
+			file_doc.insert(ignore_permissions=True)
+			frappe.db.commit()
+			print(file_doc.file_url)
+			return file_doc.file_url
 	return None
 
 # Get data from paperless-ngx
@@ -115,8 +119,6 @@ def job_status(jobid):
 	jobStatus = get_job_status(jobid)
 	print(jobStatus)
 	return jobStatus
-
-
 
 def get_ai_data(self):
 	print('Initiate get ai data ...')
