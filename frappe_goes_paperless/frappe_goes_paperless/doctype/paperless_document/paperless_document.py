@@ -207,10 +207,11 @@ def sync_documents():
 			new_doc.status = "new"
 			new_doc.frappe_doctype = frappe_doctype
 			new_doc.ai_prompt = frappe_prompt
+			new_doc.save()
 			thumbimage = get_paperless_docthumb(id, new_doc.name)
 			if thumbimage:
 				new_doc.thumbprint = thumbimage
-			new_doc.insert()
+			new_doc.save()
 			frappe.db.commit()
 			print(f"Document added -> {get_document['title']}")
 		except Exception as e:
