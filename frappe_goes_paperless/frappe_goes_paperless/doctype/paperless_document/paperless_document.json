@@ -15,6 +15,7 @@
   "get_ai_data",
   "column_break_wieg",
   "thumbprint",
+  "thumbprint_preview",
   "section_break_czaa",
   "ai_response",
   "ai_response_json"
@@ -77,17 +78,23 @@
   },
   {
    "fieldname": "thumbprint",
-   "fieldtype": "Image",
-   "label": "Document Preview"
+   "fieldtype": "Attach Image",
+   "hidden": 1
   },
   {
    "fieldname": "section_break_czaa",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "thumbprint_preview",
+   "fieldtype": "Image",
+   "label": "Document Preview",
+   "options": "thumbprint"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-16 09:23:14.435131",
+ "modified": "2024-08-16 10:07:25.086569",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
