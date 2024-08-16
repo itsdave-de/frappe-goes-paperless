@@ -12,7 +12,7 @@ frappe.ui.form.on("Paperless Document", {
                     if (response.message) {
                         const jobId = response.message;
                         console.log('jobid -> ' + jobId);
-                        verificarStatusJob(jobId);
+                        verificarStatusJob(jobId, frm);
                     }
                 }
             });
@@ -23,7 +23,7 @@ frappe.ui.form.on("Paperless Document", {
     }
 });
 
-function verificarStatusJob(jobId) {
+function verificarStatusJob(jobId, frm) {
     frappe.call({
         method: "frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.job_status",
         args: {
