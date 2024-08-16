@@ -119,7 +119,7 @@ def job_status(jobid):
 	getStatus = None
 	getJob = [(j.job_id, j.status) for j in frappe.get_all('RQ Job', filters={'job_id': jobid}) if j.job_id == jobid]
 	if getJob > 0:
-		for job_id, status for getJob:
+		for job_id, status in getJob:
 			if job_id == jobid:
 				getStatus = status
 				break
