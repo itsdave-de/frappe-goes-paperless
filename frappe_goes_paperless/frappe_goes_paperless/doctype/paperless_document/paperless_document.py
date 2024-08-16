@@ -101,7 +101,6 @@ def job_status(jobid):
 
 def get_ai_data(self):
 	print('Initiate get ai data ...')
-	frappe.publish_realtime('msgprint', 'Starting query in AI...')
 
 	client = OpenAI(api_key = get_ai_settings())
 	self = json.loads(self)
@@ -142,7 +141,7 @@ def get_ai_data(self):
 	doc.status = 'AI-Response-Recieved'
 	doc.save()
 	frappe.db.commit()
-	frappe.publish_realtime('msgprint', 'Response received successfully, fields updated!')
+	frappe.publish_realtime('msgprint_end', 'Response received successfully, fields updated!')
 	print('Response received successfully, fields updated!')
 
 

@@ -43,3 +43,7 @@ function verificarStatusJob(jobId) {
         }
     });
 }
+
+frappe.realtime.on('msgprint_end', (data) => {
+    frappe.show_alert(data);
+});
