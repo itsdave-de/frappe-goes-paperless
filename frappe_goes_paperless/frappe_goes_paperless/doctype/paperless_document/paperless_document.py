@@ -73,6 +73,7 @@ def get_paperless_docthumb(id, docname):
 			file_doc = frappe.new_doc("File")
 			file_doc.file_name = f"docthumb-{id}.webp"
 			file_doc.attached_to_doctype = 'Paperless Document'
+			file_doc.attached_to_name = docname
 			file_doc.content = response.content
 			file_doc.decode = False
 			file_doc.is_private = False
