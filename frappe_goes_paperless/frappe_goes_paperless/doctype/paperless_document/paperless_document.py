@@ -74,6 +74,7 @@ def get_paperless_docthumb(id, docname):
 		if response.content:
 			file_name = f"docthumb-{id}.webp"
 			file_url = save_file(file_name, response.content, 'Paperless Document', docname)
+			print(file_url)
 			return file_url
 	return None
 
