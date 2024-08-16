@@ -78,7 +78,8 @@
   },
   {
    "fieldname": "thumbprint",
-   "fieldtype": "Attach Image"
+   "fieldtype": "Attach Image",
+   "hidden": 1
   },
   {
    "fieldname": "section_break_czaa",
@@ -93,7 +94,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-16 11:07:04.034622",
+ "modified": "2024-08-16 11:21:13.243565",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
