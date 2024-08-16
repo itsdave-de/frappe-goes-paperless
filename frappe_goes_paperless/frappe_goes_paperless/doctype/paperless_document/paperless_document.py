@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.password import get_decrypted_password
 from frappe.utils.background_jobs import get_job_status
+from frappe.utils.file_manager import save_file
 import requests
 import re
 import json
@@ -57,6 +58,23 @@ def get_paperless_ids():
 	if response.status_code == 200:
 		if len(response.json()) > 0:
 			return response.json()['all']
+	return None
+
+# Get document thumbprint image
+def get_paperless_docthumb(id, docname):
+	server_url, api_token = get_paperless_settings()
+	response = requests.get(
+        f"{server_url.rstrip('/')}/api/documents/{id}/thumb/",
+        headers = {
+			"Authorization": f"Token {api_token}",
+			"Content-Type": "image/webp"
+		}
+	)
+	if response.status_code == 200:
+		if response.content:
+			file_name = f"docthumb-{id}.webp"
+			file_url = save_file(file_name, response.content, 'Paperless Document', docname)
+			return file_url
 	return None
 
 # Get data from paperless-ngx
@@ -178,15 +196,14 @@ def sync_documents():
 			else:
 				frappe_prompt = None
 			# add document
-			new_doc = frappe.get_doc({
-				"doctype": "Paperless Document",
-				"paperless_document_id": id,
-				"paperless_correspondent": paperless_api('correspondents', get_document['correspondent'])['name'],
-				"paperless_documenttype": paperless_doctype,
-				"status": "new",
-				"frappe_doctype": frappe_doctype,
-				"ai_prompt": frappe_prompt
-			})
+			new_doc = frappe.new_doc("Paperless Document")
+			new_doc.paperless_document_id = id
+			new_doc.paperless_correspondent = paperless_api('correspondents', get_document['correspondent'])['name']
+			new_doc.paperless_documenttype = paperless_doctype
+			new_doc.status = "new"
+			new_doc.frappe_doctype = frappe_doctype
+			new_doc.ai_prompt = frappe_prompt
+			new_doc.thumbprint = get_paperless_docthumb(id, new_doc.name)
 			new_doc.insert()
 			frappe.db.commit()
 			print(f"Document added -> {get_document['title']}")
