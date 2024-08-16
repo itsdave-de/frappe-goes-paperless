@@ -18,7 +18,7 @@ frappe.ui.form.on("Paperless Document", {
             });
         }, __("Actions"));
         frm.add_custom_button(__('Open document on Paperless'), (frm) => {
-            window.open('http://10.251.0.55:8000/documents/' + frm.doc.paperless_document_id + '/details', '_blank');
+            this.window.open('http://10.251.0.55:8000/documents/' + frm.doc.paperless_document_id + '/details', '_blank');
         }, __("Actions"));
     }
 });
