@@ -12,7 +12,6 @@
   "status",
   "frappe_doctype",
   "ai_prompt",
-  "get_ai_data",
   "column_break_wieg",
   "thumbprint",
   "thumbprint_preview",
@@ -55,11 +54,6 @@
    "options": "DocType"
   },
   {
-   "fieldname": "get_ai_data",
-   "fieldtype": "Button",
-   "label": "Get AI Data"
-  },
-  {
    "fieldname": "ai_prompt",
    "fieldtype": "Link",
    "label": "AI Prompt",
@@ -94,7 +88,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-16 11:21:13.243565",
+ "modified": "2024-08-16 12:03:42.676926",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
