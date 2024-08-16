@@ -131,7 +131,7 @@ def get_ai_data(self):
 	# get prompt
 	prompt = frappe.get_doc("AI Prompt", self.get('ai_prompt'), fields=['long_text_fnbe'])
 	# concat fulltext and prompt
-	prompt = f"{get_paperless_fulltext(self.get('paperless_document_id'))}\n\n{prompt.long_text_fnbe}"
+	prompt = f"{self.get('document_fulltext')}\n\n{prompt.long_text_fnbe}"
 	# init chat
 	chat_completion = client.chat.completions.create(
 		messages=[
@@ -201,6 +201,7 @@ def sync_documents():
 			new_doc.status = "new"
 			new_doc.frappe_doctype = frappe_doctype
 			new_doc.ai_prompt = frappe_prompt
+			new_doc.document_fulltext = get_document['content']
 			new_doc.save()
 			thumbimage = get_paperless_docthumb(id, new_doc.name)
 			if thumbimage:
