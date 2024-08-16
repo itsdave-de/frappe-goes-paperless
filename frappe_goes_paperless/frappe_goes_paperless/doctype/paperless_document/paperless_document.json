@@ -13,6 +13,9 @@
   "frappe_doctype",
   "ai_prompt",
   "get_ai_data",
+  "column_break_wieg",
+  "thumbprint",
+  "section_break_czaa",
   "ai_response",
   "ai_response_json"
  ],
@@ -67,11 +70,24 @@
    "in_list_view": 1,
    "label": "Status",
    "options": "new\nAI-Response-Recieved"
+  },
+  {
+   "fieldname": "column_break_wieg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "thumbprint",
+   "fieldtype": "HTML",
+   "label": "Document Preview"
+  },
+  {
+   "fieldname": "section_break_czaa",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-15 16:10:05.000029",
+ "modified": "2024-08-16 08:38:23.998762",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
