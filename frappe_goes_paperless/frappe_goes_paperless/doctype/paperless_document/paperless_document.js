@@ -35,10 +35,7 @@ function verificarStatusJob(jobId) {
                 console.log('Job status -> ' + status);
                 if (status === "finished") {
                     frappe.show_alert('Response received successfully, fields updated!')
-                    if(!window.location.hash) {
-                        window.location = window.location + '#';
-                        window.location.reload();
-                    }
+                    frm.refresh();
                 } else if (status === "failed") {
                     frappe.msgprint(__('The job is failed'));
                 } else {
