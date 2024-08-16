@@ -2,21 +2,26 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Paperless Document", {
-    refresh: function(frm) {
-        frm.get_field('get_ai_data').onclick = function() {
-            frappe.show_alert('Starting query in AI...');
-            frappe.call({
-                method: 'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.button_get_ai',
-                args: { doc: frm.doc },
-                callback: function(response) {
-                    if (response.message) {
-                        const jobId = response.message;
-                        console.log('jobid -> ' + jobId);
-                        verificarStatusJob(jobId);
+    onload: function(frm) {
+        frm.add_custom_button(__('Actions'), function(frm) {
+            frm.page.add_action_item(__('Get AI data'), function() {
+                frappe.show_alert('Starting query in AI...');
+                frappe.call({
+                    method: 'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.button_get_ai',
+                    args: { doc: frm.doc },
+                    callback: function(response) {
+                        if (response.message) {
+                            const jobId = response.message;
+                            console.log('jobid -> ' + jobId);
+                            verificarStatusJob(jobId);
+                        }
                     }
-                }
+                });
             });
-        };
+            frm.page.add_action_item(__('Open document on Paperless'), function(frm) {
+                window.open('http://10.251.0.55:8000/documents/' + frm.doc.paperless_document_id + '/details', '_blank');
+            });
+        });
     }
 });
 
