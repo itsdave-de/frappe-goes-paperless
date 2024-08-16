@@ -20,6 +20,10 @@ frappe.ui.form.on("Paperless Document", {
         frm.add_custom_button(__('Open document on Paperless'), () => {
             this.window.open('http://10.251.0.55:8000/documents/' + frm.doc.paperless_document_id + '/details', '_blank');
         }, __("Actions"));
+        // realtime message
+        frappe.realtime.on('msgprint_end', (data) => {
+            frappe.show_alert(data);
+        });
     }
 });
 
@@ -47,6 +51,3 @@ function verificarStatusJob(jobId) {
     });
 }
 
-frappe.realtime.on('msgprint_end', (data) => {
-    frappe.show_alert(data);
-});
