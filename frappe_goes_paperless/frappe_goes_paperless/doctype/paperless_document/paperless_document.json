@@ -17,7 +17,8 @@
   "thumbprint_preview",
   "section_break_czaa",
   "ai_response",
-  "ai_response_json"
+  "ai_response_json",
+  "document_fulltext"
  ],
  "fields": [
   {
@@ -84,11 +85,16 @@
    "fieldtype": "Image",
    "label": "Document Preview",
    "options": "thumbprint"
+  },
+  {
+   "fieldname": "document_fulltext",
+   "fieldtype": "Long Text",
+   "label": "Document Fulltext"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-16 12:03:42.676926",
+ "modified": "2024-08-16 13:46:14.209323",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
