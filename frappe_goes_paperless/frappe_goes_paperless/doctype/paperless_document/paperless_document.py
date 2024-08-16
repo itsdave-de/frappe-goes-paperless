@@ -209,6 +209,6 @@ def sync_documents():
 			print(f"Document added -> {get_document['title']}")
 		except Exception as e:
 			# Handle HTTP errors
-			frappe.log_error(
-				f"Failed to fetch documents from Paperless-ngx: {e}"
-			)
+			msg = f"Failed to fetch documents from Paperless-ngx: {e}"
+			print(msg)
+			frappe.log_error(msg)
