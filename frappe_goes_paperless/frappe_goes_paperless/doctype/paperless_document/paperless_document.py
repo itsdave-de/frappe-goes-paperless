@@ -206,7 +206,8 @@ def sync_documents():
 			new_doc.status = "new"
 			new_doc.frappe_doctype = frappe_doctype
 			new_doc.ai_prompt = frappe_prompt
-			new_doc.thumbprint = get_paperless_docthumb(id, new_doc.name)
+			thumbimage = get_paperless_docthumb(id, new_doc.name)
+			new_doc.thumbprint = thumbimage if thumbimage else None
 			new_doc.insert()
 			frappe.db.commit()
 			print(f"Document added -> {get_document['title']}")
