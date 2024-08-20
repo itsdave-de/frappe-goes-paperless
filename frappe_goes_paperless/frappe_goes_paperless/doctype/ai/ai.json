@@ -29,7 +29,8 @@
   {
    "fieldname": "api_key",
    "fieldtype": "Password",
-   "label": "API Key"
+   "label": "API Key",
+   "length": 200
   },
   {
    "fieldname": "interface",
@@ -40,7 +41,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-16 15:14:24.527796",
+ "modified": "2024-08-20 12:00:56.279043",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "AI",
