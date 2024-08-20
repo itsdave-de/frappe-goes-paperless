@@ -132,6 +132,8 @@ def job_status(jobid):
 def call_ai(ai, prompt, doc, background=True):
     # Universal AI
     print('Starting function to get ai ...')
+    if background == 'false':
+        background = False
     # Get AI
     try:
         doc_ai = frappe.get_doc('AI', ai)
@@ -143,7 +145,7 @@ def call_ai(ai, prompt, doc, background=True):
     print(doc_ai.interface)
     # openAI
     print(background)
-    # 
+    # false (string)
     if doc_ai.interface == 'openAI':
         if background:
             jobId = frappe.enqueue(
