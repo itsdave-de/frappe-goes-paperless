@@ -141,7 +141,9 @@ def call_ai(ai, prompt, doc, background=True):
     print(doc)
     # {"ai":"AI-00001","ai_prompt":"AIPROMPT-00001"}
     print(doc_ai.interface)
-    #
+    # openAI
+    print(background)
+    # 
     if doc_ai.interface == 'openAI':
         if background:
             jobId = frappe.enqueue(
