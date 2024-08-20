@@ -142,7 +142,7 @@ def call_ai(ai, prompt, doc, background=True):
     # {"ai":"AI-00001","ai_prompt":"AIPROMPT-00001"}
     print(doc_ai.interface)
     #
-    if doc_ai.interface == 'openai':
+    if doc_ai.interface == 'openAI':
         if background:
             jobId = frappe.enqueue(
                 'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.use_openai',
