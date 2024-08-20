@@ -9,6 +9,7 @@
   "doctype_section",
   "document_type",
   "document",
+  "paperless_doc",
   "parameters_section",
   "ai",
   "ai_prompt_template",
@@ -65,11 +66,17 @@
    "fieldtype": "Dynamic Link",
    "label": "Document",
    "options": "document_type"
+  },
+  {
+   "fieldname": "paperless_doc",
+   "fieldtype": "Link",
+   "label": "Paperless Document",
+   "options": "Paperless Document"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-16 15:33:03.854733",
+ "modified": "2024-08-20 12:25:13.365179",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "AI Query",
