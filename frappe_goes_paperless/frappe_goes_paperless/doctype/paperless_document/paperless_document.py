@@ -164,22 +164,22 @@ def call_ai(ai, prompt, doc, background=True):
                 return do_ai
 
 
-def use_openai(doc, prompt, ai_config, background=True):
+def use_openai(doc, prompt, ai_name, background=True):
     print('Initiate get ai data ...')
 
-    client = OpenAI(api_key = get_ai_settings(ai_config))
+    client = OpenAI(api_key = get_ai_settings(ai_name))
     doc = json.loads(doc)
 
     # get prompt
     prompt = frappe.get_doc("AI Prompt", doc.get('ai_prompt'), fields=['long_text_fnbe', 'for_doctype'])
     # concat fulltext and prompt
-    efective_prompt = f"{doc.get('document_fulltext')}\n\n{prompt.long_text_fnbe}"
+    effective_prompt = f"{doc.get('document_fulltext')}\n\n{prompt.long_text_fnbe}"
     # init chat
     chat_completion = client.chat.completions.create(
         messages=[
             {
                 "role": "user",
-                "content": efective_prompt,
+                "content": effective_prompt,
             }
         ],
         model="chatgpt-4o-latest",
@@ -188,12 +188,12 @@ def use_openai(doc, prompt, ai_config, background=True):
         resp = chat_completion.choices[0].message.content
     else:
         resp = ""
-    # update doctype AI Query
+    # add doctype AI Query
     new_query = frappe.new_doc("AI Query")
     new_query.document_type = prompt.for_doctype
-    new_query.ai = doc.get('ai')
+    new_query.ai = ai_name
     new_query.ai_prompt_template = doc.get('ai_prompt')
-    new_query.efective_prompt = efective_prompt
+    new_query.effective_prompt = effective_prompt
     new_query.ai_response = resp.strip() if resp else ""
     
     json_pattern = r'\{.*\}'
