@@ -20,6 +20,67 @@ frappe.ui.form.on("Paperless Document", {
         frm.add_custom_button(__('Open document on Paperless'), () => {
             this.window.open('http://10.251.0.55:8000/documents/' + frm.doc.paperless_document_id + '/details', '_blank');
         }, __("Actions"));
+
+        // Add a custom button named "Query AI"
+        frm.add_custom_button(__('Query AI'), function() {
+            // Define the Dialog
+            let d = new frappe.ui.Dialog({
+                title: 'Execute AI Query',
+                fields: [
+                    {
+                        label: 'AI',
+                        fieldname: 'ai',
+                        fieldtype: 'Link',
+                        options: 'AI',  // The Doctype to link to
+                        reqd: 1
+                    },
+                    {
+                        label: 'AI Prompt',
+                        fieldname: 'ai_prompt',
+                        fieldtype: 'Link',
+                        options: 'AI Prompt',  // The Doctype to link to
+                        reqd: 1
+                    }
+                ],
+                primary_action_label: 'Execute AI Query',
+                primary_action: function(data) {
+                    // Freeze the screen
+                    frappe.freeze();
+
+                    // Call the server-side method
+                    frappe.call({
+                        method: 'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.call_ai',
+                        args: {
+                            ai: data.ai,
+                            prompt: data.ai_prompt,
+                            doc: data,
+                            background: false
+                        },
+                        callback: function(r) {
+                            // Unfreeze the screen
+                            frappe.unfreeze();
+
+                            if (r.message) {
+                                // Display the response as a message
+                                frappe.msgprint(r.message);
+                            } else {
+                                frappe.msgprint(__('No response received.'));
+                            }
+                        },
+                        error: function() {
+                            // Unfreeze the screen in case of error
+                            frappe.unfreeze();
+                        }
+                    });
+
+                    // Close the dialog
+                    d.hide();
+                }
+            });
+
+            // Show the dialog
+            d.show();
+        });
     }
 });
 
