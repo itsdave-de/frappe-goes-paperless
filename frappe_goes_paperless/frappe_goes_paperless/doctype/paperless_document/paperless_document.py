@@ -139,6 +139,9 @@ def call_ai(ai, prompt, doc, background=True):
         return 'AI not found!'
     # Check if AI is OpenAI
     print(doc)
+    # {"ai":"AI-00001","ai_prompt":"AIPROMPT-00001"}
+    print(doc_ai)
+    #
     if doc_ai.interface == 'openai':
         if background:
             jobId = frappe.enqueue(
