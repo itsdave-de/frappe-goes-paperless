@@ -191,6 +191,7 @@ def use_openai(doc, prompt, ai_name, background=True):
     # add doctype AI Query
     new_query = frappe.new_doc("AI Query")
     new_query.document_type = prompt.for_doctype
+    new_query.paperless_doc = doc.get('name')
     new_query.ai = ai_name
     new_query.ai_prompt_template = doc.get('ai_prompt')
     new_query.effective_prompt = effective_prompt
