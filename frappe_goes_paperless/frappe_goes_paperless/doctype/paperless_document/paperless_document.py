@@ -138,6 +138,7 @@ def call_ai(ai, prompt, doc, background=True):
     except frappe.DoesNotExistError:
         return 'AI not found!'
     # Check if AI is OpenAI
+    print(doc)
     if doc_ai.interface == 'openai':
         if background:
             jobId = frappe.enqueue(
@@ -146,6 +147,7 @@ def call_ai(ai, prompt, doc, background=True):
                 now = False,
                 doc = doc,
                 prompt = prompt,
+                ai_config = doc_ai.name,
                 background = True
             )
             return jobId
