@@ -139,13 +139,6 @@ def call_ai(ai, prompt, doc, background=True):
         doc_ai = frappe.get_doc('AI', ai)
     except frappe.DoesNotExistError:
         return 'AI not found!'
-    # Check if AI is OpenAI
-    print(doc)
-    # {"ai":"AI-00001","ai_prompt":"AIPROMPT-00001"}
-    print(doc_ai.interface)
-    # openAI
-    print(background)
-    # false (string)
     if doc_ai.interface == 'openAI':
         if background:
             jobId = frappe.enqueue(
@@ -171,7 +164,7 @@ def use_openai(doc, prompt, ai_name, background=True):
     doc = json.loads(doc)
 
     # get prompt
-    prompt = frappe.get_doc("AI Prompt", doc.get('ai_prompt'), fields=['long_text_fnbe', 'for_doctype'])
+    prompt = frappe.get_doc("AI Prompt", prompt, fields=['long_text_fnbe', 'for_doctype'])
     # concat fulltext and prompt
     effective_prompt = f"{doc.get('document_fulltext')}\n\n{prompt.long_text_fnbe}"
     # init chat
@@ -193,7 +186,7 @@ def use_openai(doc, prompt, ai_name, background=True):
     new_query.document_type = prompt.for_doctype
     new_query.paperless_doc = doc.get('name')
     new_query.ai = ai_name
-    new_query.ai_prompt_template = doc.get('ai_prompt')
+    new_query.ai_prompt_template = prompt
     new_query.effective_prompt = effective_prompt
     new_query.ai_response = resp.strip() if resp else ""
     
