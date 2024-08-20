@@ -51,7 +51,7 @@ frappe.ui.form.on("Paperless Document", {
                         args: {
                             ai: data.ai,
                             prompt: data.ai_prompt,
-                            doc: data,
+                            doc: frm.doc,
                             background: false
                         },
                         callback: function(r) {
