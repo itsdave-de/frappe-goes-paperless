@@ -44,8 +44,6 @@ frappe.ui.form.on("Paperless Document", {
                 ],
                 primary_action_label: 'Execute AI Query',
                 primary_action: function(data) {
-                    // Freeze the screen
-                    frappe.freeze();
 
                     // Call the server-side method
                     frappe.call({
@@ -57,8 +55,6 @@ frappe.ui.form.on("Paperless Document", {
                             background: false
                         },
                         callback: function(r) {
-                            // Unfreeze the screen
-                            frappe.unfreeze();
 
                             if (r.message) {
                                 // Display the response as a message
@@ -69,8 +65,10 @@ frappe.ui.form.on("Paperless Document", {
                         },
                         error: function() {
                             // Unfreeze the screen in case of error
-                            frappe.unfreeze();
-                        }
+                            //frappe.unfreeze();
+                        },
+                        freeze: true,
+                        freeze_message: 'Executing AI Query...'
                     });
 
                     // Close the dialog

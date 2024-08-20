@@ -188,7 +188,10 @@ def use_openai(doc, prompt, ai_config, background=True):
     new_query.ai_response = resp.strip() if resp else ""
     
     json_pattern = r'\{.*\}'
-    matches = re.findall(json_pattern, resp, re.DOTALL)
+    if resp is not None:
+        matches = re.findall(json_pattern, resp, re.DOTALL)
+    else:
+        matches = []
     if matches:
         json_content = matches[0]
         try:
@@ -221,12 +224,16 @@ def sync_documents():
     # get all ids from frappe
     docs = frappe.get_all('Paperless Document', fields=['paperless_document_id'])
     # Get a array with missing ids (compare the two lists of ids)
-    mis = list(set(ids) - set([int(id['paperless_document_id']) for id in docs]))
+    mis = list(set(ids) - set([int(id['paperless_document_id']) for id in docs if id.get('paperless_document_id') is not None]))
     for id in mis:
         try:
             get_document = paperless_api('documents', id)
             # Get frappe doctype by Paperless doctype
-            paperless_doctype = paperless_api('document_types', get_document['document_type'])
+            response = paperless_api('document_types', get_document['document_type'])
+            if response is not None:
+                paperless_doctype = response['name']
+            else:
+                paperless_doctype = None
             paperless_doctype = paperless_doctype['name'] if paperless_doctype else None
             frappe_doctype = frappe.get_all(
                 'Paperless Document Type Mapping',
