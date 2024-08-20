@@ -166,7 +166,7 @@ def use_openai(doc, prompt, ai_name, background=True):
     # get prompt
     prompt = frappe.get_doc("AI Prompt", prompt, fields=['long_text_fnbe', 'for_doctype'])
     # concat fulltext and prompt
-    effective_prompt = f"{doc.get('document_fulltext')}\n\n{prompt.long_text_fnbe}"
+    effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
     # init chat
     chat_completion = client.chat.completions.create(
         messages=[
