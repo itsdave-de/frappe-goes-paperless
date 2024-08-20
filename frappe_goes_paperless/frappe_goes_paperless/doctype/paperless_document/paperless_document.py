@@ -217,7 +217,7 @@ def use_openai(doc, prompt, ai_name, background=True):
         frappe.publish_realtime('msgprint_end', 'Response received successfully, fields updated!')
         return True
     else:
-        return 'Response received successfully, fields updated!'
+        return f'AI query sucessfull. <a href="{frappe.utils.get_url()}/app/ai-query/{new_query.name}">Check out response</a>.'
 
 
 @frappe.whitelist()
