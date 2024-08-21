@@ -141,7 +141,7 @@ def create_purchase_invoice(doc):
     supplier = frappe.db.get_value(
         'Supplier',
         {
-            'ID': doc.get('supplier')
+            'name': doc.get('supplier')
         }
     )
     print(doc)
