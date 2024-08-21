@@ -68,6 +68,7 @@ def create_supplier(doc):
 	)
 	if not address:
 		address = frappe.new_doc('Address')
+		address.address_title = 'Main Address'
 		address.address_line1 = invoice_details['SupplierAddress']['Street']
 		address.city = invoice_details['SupplierAddress']['City']
 		address.pincode = invoice_details['SupplierAddress']['PostalCode']
