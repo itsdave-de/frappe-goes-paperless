@@ -74,13 +74,12 @@ def create_supplier(doc):
 		contact.insert()
 	else:
 		contact = frappe.get_doc('Contact', contact)
-		contact.links = [
-			{
+		if not contact.links.get('link_name') == supplier.name:
+			contact.append('links', {
 				'link_doctype': 'Supplier',
 				'link_name': supplier.name
-			}
-		]
-		contact.save()
+			})
+			contact.save()
 	# assign contact to supplier
 	supplier.supplier_primary_contact = contact.name
 	supplier.save()
@@ -109,11 +108,12 @@ def create_supplier(doc):
 		address.insert()
 	else:
 		address = frappe.get_doc('Address', address)
-		address.append('links', {
-			'link_doctype': 'Supplier',
-			'link_name': supplier.name
-		})
-		address.save()
+		if not address.links.get('link_name') == supplier.name:
+			address.append('links', {
+				'link_doctype': 'Supplier',
+				'link_name': supplier.name
+			})
+			address.save()
 	# assign address to supplier
 	supplier.supplier_primary_address = address.name
 	supplier.save()
