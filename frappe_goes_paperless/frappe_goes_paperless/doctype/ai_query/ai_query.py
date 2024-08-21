@@ -81,6 +81,9 @@ def create_supplier(doc):
 			}
 		]
 		contact.save()
+	# assign contact to supplier
+	supplier.supplier_primary_address = contact.name
+	supplier.save()
 
 	# Create a new address by json if not exists
 	address = frappe.db.get_value(
@@ -111,6 +114,9 @@ def create_supplier(doc):
 			'link_name': supplier.name
 		})
 		address.save()
+	# assign address to supplier
+	supplier.supplier_primary_address = address.name
+	supplier.save()
 
 	# commit database and return message
 	frappe.db.commit()
