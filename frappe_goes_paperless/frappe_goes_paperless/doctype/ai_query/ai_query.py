@@ -52,6 +52,8 @@ def create_supplier(doc):
 		contact.last_name = invoice_details['ContactPerson'].split(' ')[1]
 		contact.phone = invoice_details['ContactPhone']
 		contact.save()
+	else:
+		contact = frappe.get_doc('Contact', contact)
 
 	# Create a new address by json if not exists
 	address = frappe.db.get_value(
@@ -71,6 +73,8 @@ def create_supplier(doc):
 		address.pincode = invoice_details['SupplierAddress']['PostalCode']
 		address.country = get_country(invoice_details['SupplierAddress']['Country'])
 		address.save()
+	else:
+		address = frappe.get_doc('Address', address)
 
 	# Create a new supplier by json if not exists
 	supplier = frappe.db.get_value(
@@ -93,5 +97,5 @@ def create_supplier(doc):
 
 def get_country(code_country):
 	# Get country by code
-	country = frappe.get_doc('Country', code_country.lower())
-	return country.name
+	country = frappe.db.get_value('Country', {'code': code_country.lower()})
+	return country
