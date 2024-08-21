@@ -169,7 +169,6 @@ def create_purchase_invoice(doc):
         purchase_invoice.due_date = payment_information['PaymentDueDate']
         purchase_invoice.bill_no = invoice_details['InvoiceNumber']
         purchase_invoice.bill_date = invoice_details['InvoiceDate']
-        #purchase_invoice.credit_to = 'Creditors - ACC'
     else:
         purchase_invoice = frappe.get_doc('Purchase Invoice', purchase_invoice)
 
@@ -180,14 +179,11 @@ def create_purchase_invoice(doc):
                 'item_code': item['ItemNumber'],
                 'item_name': item['Description'],
                 'qty': item['Quantity'],
-                'rate': item['UnitPrice'],
-                'amount': item['Total'],
-                'base_grand_total': 0.0,
-                'uom': 'Nos'
+                'rate': item['UnitPrice']
             })
 
     # Definy the total and tax amount
-    purchase_invoice.total = financial_summary['TotalNetAmount']
+    #purchase_invoice.total = financial_summary['TotalNetAmount']
     #purchase_invoice.total_taxes_and_charges = sum(
     #    tax['Amount'] for tax in financial_summary['VAT/TAXBreakdown']['VAT/TAXList']
     #)
