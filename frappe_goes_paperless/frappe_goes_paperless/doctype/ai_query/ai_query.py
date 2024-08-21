@@ -46,7 +46,9 @@ def create_supplier(doc):
 	if not supplier:
 		supplier = frappe.new_doc('Supplier')
 		supplier.supplier_name = invoice_details['SupplierName']
-		supplier.save()
+		supplier.supplier_group = 'All Supplier Groups'
+		supplier.supplier_type = 'Company'
+		supplier.insert()
 		return_msg = 'Contact created successfully'
 	else:
 		supplier = frappe.get_doc('Supplier', supplier)
@@ -71,7 +73,7 @@ def create_supplier(doc):
 				'link_name': supplier.name
 			}
 		]
-		contact.save()
+		contact.insert()
 	else:
 		contact = frappe.get_doc('Contact', contact)
 		contact.links = [
@@ -105,7 +107,7 @@ def create_supplier(doc):
 				'link_name': supplier.name
 			}
 		]
-		address.save()
+		address.insert()
 	else:
 		address = frappe.get_doc('Address', address)
 		address.links = [
