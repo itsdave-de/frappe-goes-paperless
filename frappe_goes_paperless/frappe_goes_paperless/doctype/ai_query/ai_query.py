@@ -144,6 +144,8 @@ def create_purchase_invoice(doc):
             'supplier_name': doc.get('supplier')
         }
     )
+    print(doc)
+    print(supplier)
     if not supplier:
         frappe.throw(f"Supplier does not exist.")
     supplier_doc = frappe.get_doc('Supplier', supplier)
