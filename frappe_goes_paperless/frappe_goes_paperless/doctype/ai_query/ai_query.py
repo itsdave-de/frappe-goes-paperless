@@ -67,12 +67,10 @@ def create_supplier(doc):
 		contact.first_name = invoice_details['ContactPerson'].split(' ')[0]
 		contact.last_name = invoice_details['ContactPerson'].split(' ')[1]
 		contact.phone = invoice_details['ContactPhone']
-		contact.links = [
-			{
-				'link_doctype': 'Supplier',
-				'link_name': supplier.name
-			}
-		]
+		contact.append('links', {
+    		'link_doctype': 'Supplier',
+    		'link_name': supplier.name
+		})
 		contact.insert()
 	else:
 		contact = frappe.get_doc('Contact', contact)
@@ -101,21 +99,17 @@ def create_supplier(doc):
 		address.city = invoice_details['SupplierAddress']['City']
 		address.pincode = invoice_details['SupplierAddress']['PostalCode']
 		address.country = get_country(invoice_details['SupplierAddress']['Country'])
-		address.links = [
-			{
-				'link_doctype': 'Supplier',
-				'link_name': supplier.name
-			}
-		]
+		address.append('links', {
+			'link_doctype': 'Supplier',
+			'link_name': supplier.name
+		})
 		address.insert()
 	else:
 		address = frappe.get_doc('Address', address)
-		address.links = [
-			{
-				'link_doctype': 'Supplier',
-				'link_name': supplier.name
-			}
-		]
+		address.append('links', {
+			'link_doctype': 'Supplier',
+			'link_name': supplier.name
+		})
 		address.save()
 
 	# commit database and return message
