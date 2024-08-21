@@ -49,7 +49,7 @@ def create_supplier(doc):
 	address.address_line1 = invoice_details['SupplierAddress']['Street']
 	address.city = invoice_details['SupplierAddress']['City']
 	address.pincode = invoice_details['SupplierAddress']['PostalCode']
-	address.country = invoice_details['SupplierAddress']['Country']
+	address.country = get_country(invoice_details['SupplierAddress']['Country'])
 	address.save()
 
 	# Create a new supplier by json
@@ -60,3 +60,9 @@ def create_supplier(doc):
 	supplier.save()
 
 	return 'Supplier created successfully'
+
+
+def get_country(code_country):
+	# Get country by code
+	country = frappe.get_doc('Country', code_country.lower())
+	return country.name
