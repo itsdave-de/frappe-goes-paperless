@@ -177,9 +177,7 @@ def create_purchase_invoice(doc):
         if not item['ItemNumber']:
             purchase_invoice.append('items', {
                 'item_code': item['ItemNumber'],
-                'item_name': item['Description'],
-                'qty': item['Quantity'],
-                'rate': item['UnitPrice']
+                'item_name': item['Description']
             })
 
     # Definy the total and tax amount
