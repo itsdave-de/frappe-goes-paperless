@@ -182,6 +182,7 @@ def create_purchase_invoice(doc):
                 'qty': item['Quantity'],
                 'rate': item['UnitPrice'],
                 'amount': item['Total'],
+                'base_grand_total': 0.0,
                 'uom': 'Nos'
             })
 
