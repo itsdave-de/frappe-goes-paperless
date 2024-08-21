@@ -151,9 +151,9 @@ def create_purchase_invoice(doc):
     supplier_doc = frappe.get_doc('Supplier', supplier)
 
     invoice_details = json_data.get('InvoiceDetails')
-    items_purchased = invoice_details['ItemsPurchased']['ItemList']
-    financial_summary = invoice_details['FinancialSummary']
-    payment_information = invoice_details['PaymentInformation']
+    items_purchased = json_data['ItemsPurchased']['ItemList']
+    financial_summary = json_data['FinancialSummary']
+    payment_information = json_data['PaymentInformation']
 
     # Create if not exists
     purchase_invoice = frappe.db.get_value(
