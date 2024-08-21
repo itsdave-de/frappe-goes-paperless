@@ -34,7 +34,6 @@ def create_supplier(doc):
     #   "PostalCode": "49163",
     #   "Country": "DE"
     # }
-
 	invoice_details = json_data.get('InvoiceDetails')
 
 	# Create a new supplier by json if not exists and save to edit
@@ -42,8 +41,7 @@ def create_supplier(doc):
 		'Supplier',
 		{
 			'supplier_name': invoice_details['SupplierName']
-		},
-		'name'
+		}
 	)
 	if not supplier:
 		supplier = frappe.new_doc('Supplier')
@@ -60,8 +58,7 @@ def create_supplier(doc):
 		{
 			'first_name': invoice_details['ContactPerson'].split(' ')[0],
 			'last_name': invoice_details['ContactPerson'].split(' ')[1]
-		},
-		'name'
+		}
 	)
 	if not contact:
 		contact = frappe.new_doc('Contact')
@@ -93,8 +90,7 @@ def create_supplier(doc):
 			'city': invoice_details['SupplierAddress']['City'],
 			'pincode': invoice_details['SupplierAddress']['PostalCode'],
 			'country': get_country(invoice_details['SupplierAddress']['Country'])
-		},
-		'name'
+		}
 	)
 	if not address:
 		address = frappe.new_doc('Address')
