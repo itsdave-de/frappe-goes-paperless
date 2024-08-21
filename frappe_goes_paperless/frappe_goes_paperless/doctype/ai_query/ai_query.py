@@ -37,29 +37,58 @@ def create_supplier(doc):
 
 	invoice_details = json_data.get('InvoiceDetails')
 
-	# Create a new contact by json
-	contact = frappe.new_doc('Contact')
-	contact.first_name = invoice_details['ContactPerson'].split(' ')[0]
-	contact.last_name = invoice_details['ContactPerson'].split(' ')[1]
-	contact.phone = invoice_details['ContactPhone']
-	contact.save()
+	# Create a new contact by json if not exists
+	contact = frappe.db.get_value(
+		'Contact', 
+		{
+			'first_name': invoice_details['ContactPerson'].split(' ')[0],
+			'last_name': invoice_details['ContactPerson'].split(' ')[1]
+		},
+		'name'
+	)
+	if not contact:
+		contact = frappe.new_doc('Contact')
+		contact.first_name = invoice_details['ContactPerson'].split(' ')[0]
+		contact.last_name = invoice_details['ContactPerson'].split(' ')[1]
+		contact.phone = invoice_details['ContactPhone']
+		contact.save()
 
-	# Create a new address by json
-	address = frappe.new_doc('Address')
-	address.address_line1 = invoice_details['SupplierAddress']['Street']
-	address.city = invoice_details['SupplierAddress']['City']
-	address.pincode = invoice_details['SupplierAddress']['PostalCode']
-	address.country = get_country(invoice_details['SupplierAddress']['Country'])
-	address.save()
+	# Create a new address by json if not exists
+	address = frappe.db.get_value(
+		'Address',
+		{
+			'address_line1': invoice_details['SupplierAddress']['Street'],
+			'city': invoice_details['SupplierAddress']['City'],
+			'pincode': invoice_details['SupplierAddress']['PostalCode'],
+			'country': get_country(invoice_details['SupplierAddress']['Country'])
+		},
+		'name'
+	)
+	if not address:
+		address = frappe.new_doc('Address')
+		address.address_line1 = invoice_details['SupplierAddress']['Street']
+		address.city = invoice_details['SupplierAddress']['City']
+		address.pincode = invoice_details['SupplierAddress']['PostalCode']
+		address.country = get_country(invoice_details['SupplierAddress']['Country'])
+		address.save()
 
-	# Create a new supplier by json
-	supplier = frappe.new_doc('Supplier')
-	supplier.supplier_name = invoice_details['SupplierName']
-	supplier.contact = contact.name
-	supplier.address = address.name
-	supplier.save()
-
-	return 'Supplier created successfully'
+	# Create a new supplier by json if not exists
+	supplier = frappe.db.get_value(
+		'Supplier',
+		{
+			'supplier_name': invoice_details['SupplierName']
+		},
+		'name'
+	)
+	if not supplier:
+		supplier = frappe.new_doc('Supplier')
+		supplier.supplier_name = invoice_details['SupplierName']
+		supplier.contact = contact.name
+		supplier.address = address.name
+		supplier.save()
+		return 'Supplier created successfully'
+	else:
+		return 'Supplier already exists'
 
 
 def get_country(code_country):
