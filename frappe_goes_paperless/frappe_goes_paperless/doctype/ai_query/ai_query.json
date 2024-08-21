@@ -9,6 +9,7 @@
   "doctype_section",
   "document_type",
   "document",
+  "supplier",
   "paperless_doc",
   "parameters_section",
   "ai",
@@ -72,11 +73,17 @@
    "fieldtype": "Link",
    "label": "Paperless Document",
    "options": "Paperless Document"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-20 12:25:13.365179",
+ "modified": "2024-08-21 14:18:44.769996",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "AI Query",
