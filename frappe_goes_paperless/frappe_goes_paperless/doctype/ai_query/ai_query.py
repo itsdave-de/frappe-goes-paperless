@@ -82,7 +82,7 @@ def create_supplier(doc):
 		]
 		contact.save()
 	# assign contact to supplier
-	supplier.supplier_primary_address = contact.name
+	supplier.supplier_primary_contact = contact.name
 	supplier.save()
 
 	# Create a new address by json if not exists
