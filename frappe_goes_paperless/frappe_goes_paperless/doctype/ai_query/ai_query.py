@@ -191,6 +191,9 @@ def create_purchase_invoice(doc):
         tax['Amount'] for tax in financial_summary['VAT/TAXBreakdown']['VAT/TAXList']
     )
 
+    # Define the write off amount
+    purchase_invoice.base_write_off_amount = purchase_invoice.base_write_off_amount or 0.0
+
     # save data
     purchase_invoice.save()
     frappe.db.commit()
