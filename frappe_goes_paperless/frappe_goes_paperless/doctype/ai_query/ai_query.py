@@ -141,7 +141,7 @@ def create_purchase_invoice(doc):
     supplier = frappe.db.get_value(
         'Supplier',
         {
-            'supplier_name': json_data.get('SupplierName')
+            'supplier_name': json_data.get('supplier')
         }
     )
     if not supplier:
