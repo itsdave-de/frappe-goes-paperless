@@ -169,7 +169,7 @@ def create_purchase_invoice(doc):
         purchase_invoice.due_date = payment_information['PaymentDueDate']
         purchase_invoice.bill_no = invoice_details['InvoiceNumber']
         purchase_invoice.bill_date = invoice_details['InvoiceDate']
-        purchase_invoice.credit_to = 'Creditors - ACC'
+        #purchase_invoice.credit_to = 'Creditors - ACC'
     else:
         purchase_invoice = frappe.get_doc('Purchase Invoice', purchase_invoice)
 
