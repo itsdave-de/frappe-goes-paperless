@@ -192,7 +192,7 @@ def create_purchase_invoice(doc):
     )
 
     # Define the write off amount
-    purchase_invoice.base_write_off_amount = purchase_invoice.base_write_off_amount or 0.0
+    purchase_invoice.base_grand_total = purchase_invoice.base_grand_total if not None else 0.0
 
     # save data
     purchase_invoice.save()
