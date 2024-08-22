@@ -44,12 +44,22 @@ def create_supplier(doc):
         }
     )
     if not supplier:
-        supplier = frappe.new_doc('Supplier')
-        supplier.supplier_name = invoice_details['SupplierName']
-        supplier.supplier_group = 'All Supplier Groups'
-        supplier.supplier_type = 'Company'
+         # Create a new supplier
+        supplier = frappe.get_doc({
+            'doctype': 'Supplier',
+            'supplier_name': invoice_details['SupplierName'],
+            'supplier_group': 'Alle Lieferantengruppen',
+            'supplier_type': 'Company'
+        })
         supplier.insert()
-        return_msg = 'Contact created successfully'
+        frappe.db.commit()
+        print(f"Supplier '{supplier_name}' created successfully!")
+        # supplier = frappe.new_doc('Supplier')
+        # supplier.supplier_name = invoice_details['SupplierName']
+        # supplier.supplier_group = 'All Supplier Groups'
+        # supplier.supplier_type = 'Company'
+        # supplier.insert()
+        # return_msg = 'Contact created successfully'
     else:
         supplier = frappe.get_doc('Supplier', supplier)
         return_msg = 'Contact already exists, updated successfully'
@@ -156,29 +166,43 @@ def create_purchase_invoice(doc):
     payment_information = json_data['PaymentInformation']
 
     # Create if not exists
-    purchase_invoice = frappe.db.get_value(
-        'Purchase Invoice',
-        {
-            'bill_no': invoice_details['InvoiceNumber']
-        }
+    purchase_invoice = frappe.get_doc(
+        'Purchase Invoice', invoice_details['InvoiceNumber']
     )
     if not purchase_invoice:
-        purchase_invoice = frappe.new_doc('Purchase Invoice')
-        purchase_invoice.supplier = supplier_doc.name
-        purchase_invoice.posting_date = invoice_details['InvoiceDate']
-        purchase_invoice.due_date = payment_information['PaymentDueDate']
-        purchase_invoice.bill_no = invoice_details['InvoiceNumber']
-        purchase_invoice.bill_date = invoice_details['InvoiceDate']
+         # Create a Purchase Invoice
+        purchase_invoice = frappe.get_doc({
+            'doctype': 'Purchase Invoice',
+            'supplier': supplier_doc.name,
+            'posting_date': invoice_details['InvoiceDate'],
+            'due_date': payment_information['PaymentDueDate'],
+            'bill_no': invoice_details['InvoiceNumber'],
+            'bill_date': invoice_details['InvoiceDate'],
+            'items': []
+        })
+    
+   
+        # purchase_invoice = frappe.new_doc('Purchase Invoice')
+        # purchase_invoice.supplier = supplier_doc.name
+        # purchase_invoice.posting_date = invoice_details['InvoiceDate']
+        # purchase_invoice.due_date = payment_information['PaymentDueDate']
+        # purchase_invoice.bill_no = invoice_details['InvoiceNumber']
+        # purchase_invoice.bill_date = invoice_details['InvoiceDate']
     else:
         purchase_invoice = frappe.get_doc('Purchase Invoice', purchase_invoice)
 
     # Adiciona os itens ao Purchase Invoice
+    items = []
     for item in items_purchased:
-        if not item['ItemNumber']:
-            purchase_invoice.append('items', {
-                'item_code': item['ItemNumber'],
-                'item_name': item['Description']
-            })
+        print(item)
+        item_doc_name = create_item(item['ItemNumber'], item['Description'], supplier)
+        item_doc = ("Item", item_doc_name)
+        print(item_doc_name)
+        po_item = create_purchase_invoice_doc_item(item_doc.name,item["Quantity"], item_doc.uom, item["UnitPrice"])
+        items.append(po_item)
+
+
+        
 
     # Definy the total and tax amount
     #purchase_invoice.total = financial_summary['TotalNetAmount']
@@ -197,3 +221,38 @@ def get_country(code_country):
     # Get country by code
     country = frappe.db.get_value('Country', {'code': code_country.lower()})
     return country
+
+def create_item(item_code, item_name, supplier, item_group='All Item Groups', stock_uom='Stk'):
+
+	# Check if the item already exists
+    if not frappe.db.exists('Item', item_code):
+        # Create a new item
+        item = frappe.get_doc({
+            'doctype': 'Item',
+            'item_code': item_code,
+            'item_name': item_code,
+            "description":item_name,
+            'item_group': item_group,
+            'stock_uom': stock_uom,
+            "default_supplier": supplier,
+            'is_stock_item': 1,  # Set as a stock item
+            'include_item_in_manufacturing': 0
+            
+        })
+        item.insert()
+        frappe.db.commit()
+        print(f"Item '{item_code}' created successfully!")
+        return item.name
+    else:
+        print(f"Item '{item_code}' already exists.")
+        return frappe.get_doc("Item",item_code).name
+
+def create_Purchase_invoice_doc_item(item_code,item_qty, item_uom, item_rate ):
+		return frappe.get_doc({
+			"doctype": "Purchase Invoice Item",
+			"item_code": item_code,
+			"item_name": item_code,
+			"qty": qty,
+			"uom": uom,
+			"rate": rate
+		})

@@ -7,8 +7,11 @@
  "engine": "InnoDB",
  "field_order": [
   "caption",
+  "ai",
+  "ai_output_mode",
+  "for_doctype",
   "long_text_fnbe",
-  "for_doctype"
+  "json_scema"
  ],
  "fields": [
   {
@@ -27,11 +30,30 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Caption"
+  },
+  {
+   "fieldname": "ai",
+   "fieldtype": "Link",
+   "label": "AI",
+   "options": "AI"
+  },
+  {
+   "fieldname": "ai_output_mode",
+   "fieldtype": "Select",
+   "label": "AI Output Mode",
+   "options": "Chat\nStructured Output (JSON)"
+  },
+  {
+   "depends_on": "eval:doc.ai_output_mode == \"Structured Output (JSON)\"\n",
+   "fieldname": "json_scema",
+   "fieldtype": "Long Text",
+   "label": "JSON Scema",
+   "mandatory_depends_on": "eval:doc.ai_output_mode == \"Structured Output (JSON)\"\n"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-16 15:35:35.021294",
+ "modified": "2024-08-22 12:05:03.219862",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "AI Prompt",
