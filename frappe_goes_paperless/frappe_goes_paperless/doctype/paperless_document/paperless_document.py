@@ -205,6 +205,7 @@ def use_openai(doc, prompt, ai_name, background=True):
             ],
             function_call={"name": "generate_invoice"}
         )
+        print(chat_response)
         if chat_response.choices:
             function_call = chat_response.choices[0].message.function_call
             if function_call:
