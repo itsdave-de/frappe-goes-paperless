@@ -186,6 +186,7 @@ def use_openai(doc, prompt, ai_name, background=True):
             resp = ""
     elif prompt.ai_output_mode == 'Structured Output (JSON)':
         effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
+        print(prompt.json_scema)
         response_format = json.loads(prompt.json_scema)
         chat_response = client.chat.completions.create(
             model="gpt-4o-2024-08-06",
