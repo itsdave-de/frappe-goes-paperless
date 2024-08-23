@@ -191,7 +191,7 @@ def use_openai(doc, prompt, ai_name, background=True):
         print(type(json_schema))
         print(json_schema)
         chat_response = client.chat.completions.create(
-            model="gpt-4o-latest",
+            model="gpt-4o-2024-08-06",
             messages=[
                 {"role": "system", "content": "You are a wizard that generates invoice details in JSON format."},
                 {"role": "user", "content": prompt}
