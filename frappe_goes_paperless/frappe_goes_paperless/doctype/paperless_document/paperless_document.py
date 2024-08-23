@@ -186,10 +186,7 @@ def use_openai(doc, prompt, ai_name, background=True):
             resp = ""
     elif prompt.ai_output_mode == 'Structured Output (JSON)':
         effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
-        print(prompt.json_scema)
         json_schema = json.loads(prompt.json_scema) if type(prompt.json_scema) == str else prompt.json_scema
-        print(type(json_schema))
-        print(json_schema)
         chat_response = client.chat.completions.create(
             model="gpt-4o-2024-08-06",
             messages=[
@@ -205,7 +202,6 @@ def use_openai(doc, prompt, ai_name, background=True):
             ],
             function_call={"name": "generate_invoice"}
         )
-        print(chat_response)
         if chat_response.choices:
             function_call = chat_response.choices[0].message.function_call
             if function_call:

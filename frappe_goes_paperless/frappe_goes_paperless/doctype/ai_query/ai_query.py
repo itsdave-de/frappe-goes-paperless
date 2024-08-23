@@ -48,12 +48,12 @@ def create_supplier(doc):
         supplier = frappe.get_doc({
             'doctype': 'Supplier',
             'supplier_name': invoice_details['SupplierName'],
-            'supplier_group': 'Alle Lieferantengruppen',
+            'supplier_group': '',
             'supplier_type': 'Company'
         })
         supplier.insert()
         frappe.db.commit()
-        print(f"Supplier '{supplier_name}' created successfully!")
+        print(f"Supplier '{supplier.supplier_name}' created successfully!")
         # supplier = frappe.new_doc('Supplier')
         # supplier.supplier_name = invoice_details['SupplierName']
         # supplier.supplier_group = 'All Supplier Groups'
