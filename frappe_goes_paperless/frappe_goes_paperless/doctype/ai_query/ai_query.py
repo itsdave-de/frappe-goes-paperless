@@ -76,7 +76,7 @@ def create_supplier(doc):
         contact = frappe.new_doc('Contact')
         contact.first_name = invoice_details['ContactPerson'].split(' ')[0]
         contact.last_name = invoice_details['ContactPerson'].split(' ')[1]
-        contact.phone = invoice_details['ContactPhone']
+        contact.phone = invoice_details['ContactPhone'] if invoice_details.get('ContactPhone') else ''
         contact.append('links', {
             'link_doctype': 'Supplier',
             'link_name': supplier.name
