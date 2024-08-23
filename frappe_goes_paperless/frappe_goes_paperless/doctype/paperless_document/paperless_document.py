@@ -8,6 +8,7 @@ from frappe.utils.background_jobs import get_job_status
 import requests
 import re
 import json
+from pydantic import BaseModel
 from openai import OpenAI
 
 
@@ -157,6 +158,124 @@ def call_ai(ai, prompt, doc, background=True):
                 return do_ai
 
 
+response_format = response_format = {
+    "type": "object",
+    "properties": {
+        "invoice_details": {
+            "type": "object",
+            "properties": {
+                "invoice_number": { "type": "string" },
+                "invoice_date": { "type": "string" },
+                "customer_number": { "type": "string" },
+                "customer_name": { "type": "string" },
+                "customer_address": {
+                    "type": "object",
+                    "properties": {
+                        "street": { "type": "string" },
+                        "city": { "type": "string" },
+                        "postal_code": { "type": "string" },
+                        "country": { "type": "string" }
+                    }
+                },
+                "contact_person": { "type": "string" },
+                "contact_phone": { "type": "string" },
+                "supplier_name": { "type": "string" },
+                "supplier_address": {
+                    "type": "object",
+                    "properties": {
+                        "street": { "type": "string" },
+                        "city": { "type": "string" },
+                        "postal_code": { "type": "string" },
+                        "country": { "type": "string" }
+                    }
+                },
+                "order_number": { "type": "string" },
+                "delivery_date": { "type": "string" },
+                "remarks": { "type": "string" }
+            }
+        },
+        "items_purchased": {
+            "type": "object",
+            "properties": {
+                "item_list": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "item_number": { "type": "string" },
+                            "description": { "type": "string" },
+                            "quantity": { "type": "number" },
+                            "unit_price": { "type": "number" },
+                            "total": { "type": "number" },
+                            "country_of_origin": { "type": "string" },
+                            "weight_gross_net": { "type": "string" },
+                            "tariff_code": { "type": "string" }
+                        }
+                    }
+                }
+            }
+        },
+        "financial_summary": {
+            "type": "object",
+            "properties": {
+                "total_net_amount": { "type": "number" },
+                "vat_tax_breakdown": {
+                    "type": "object",
+                    "properties": {
+                        "vat_tax_list": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "type": { "type": "string" },
+                                    "rate": { "type": "number" },
+                                    "amount": { "type": "number" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "total_amount_due": { "type": "number" },
+                "financial_check_passed": { "type": "boolean" }
+            }
+        },
+        "payment_information": {
+            "type": "object",
+            "properties": {
+            "payment_due_date": { "type": "string" },
+            "payment_method": { "type": "string" },
+            "bank_details": {
+                "type": "object",
+                "properties": {
+                    "bank_1": {
+                        "type": "object",
+                        "properties": {
+                            "iban": { "type": "string" },
+                            "bank_name": { "type": "string" },
+                            "bic": { "type": "string" }
+                        }
+                    },
+                    "bank_2": {
+                        "type": "object",
+                        "properties": {
+                            "iban": { "type": "string" },
+                            "bank_name": { "type": "string" },
+                            "bic": { "type": "string" }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "additional_information": {
+        "type": "object",
+        "properties": {
+            "factoring_information": { "type": "string" }
+        }
+    }
+    }
+}
+
 def use_openai(doc, prompt, ai_name, background=True):
     print('Initiate get ai data ...')
 
@@ -164,23 +283,51 @@ def use_openai(doc, prompt, ai_name, background=True):
     doc = json.loads(doc)
 
     # get prompt
-    prompt = frappe.get_doc("AI Prompt", prompt, fields=['long_text_fnbe', 'for_doctype'])
-    # concat fulltext and prompt
-    effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
-    # init chat
-    chat_completion = client.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": effective_prompt,
-            }
-        ],
-        model="chatgpt-4o-latest",
-    )
-    if chat_completion.choices:
-        resp = chat_completion.choices[0].message.content
-    else:
-        resp = ""
+    prompt = frappe.get_doc("AI Prompt", prompt)
+    # check AI mode
+    if prompt.ai_output_mode == 'Chat':
+        # concat fulltext and prompt
+        effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
+        # init chat
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": effective_prompt,
+                }
+            ],
+            model="chatgpt-4o-latest",
+        )
+        if chat_completion.choices:
+            resp = chat_completion.choices[0].message.content
+        else:
+            resp = ""
+    elif prompt.ai_output_mode == 'Structured Output (JSON)':
+        effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
+        chat_response = client.chat.completions.create(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {"role": "system", "content": "You are a wizard that generates invoice details in JSON format."},
+                {"role": "user", "content": prompt}
+            ],
+            functions=[
+                {
+                    "name": "generate_invoice",
+                    "description": "Generates an invoice based on the provided schema.",
+                    "parameters": response_format
+                }
+            ],
+            function_call={"name": "generate_invoice"}
+        )
+        if chat_response.choices:
+            function_call = chat_response.choices[0].message.function_call
+            if function_call:
+                resp = json.loads(function_call.arguments)
+            else:
+                resp = ""
+        else:
+            resp = ""        
+
     # add doctype AI Query
     new_query = frappe.new_doc("AI Query")
     new_query.document_type = prompt.for_doctype
