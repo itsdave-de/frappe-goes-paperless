@@ -154,7 +154,6 @@ def create_purchase_invoice(doc):
             'name': doc.get('supplier')
         }
     )
-    print(doc)
     print(supplier)
     if not supplier:
         frappe.throw(f"Supplier does not exist.")
@@ -166,10 +165,10 @@ def create_purchase_invoice(doc):
     payment_information = json_data['PaymentInformation']
 
     # Create if not exists
-    purchase_invoice = frappe.get_doc(
-        'Purchase Invoice', invoice_details['InvoiceNumber']
+    purchase_invoice_list = frappe.get_all(
+        'Purchase Invoice', filters= {"bill_no": invoice_details['InvoiceNumber']}
     )
-    if not purchase_invoice:
+    if len(purchase_invoice_list) == 0:
          # Create a Purchase Invoice
         purchase_invoice = frappe.get_doc({
             'doctype': 'Purchase Invoice',
@@ -180,28 +179,20 @@ def create_purchase_invoice(doc):
             'bill_date': invoice_details['InvoiceDate'],
             'items': []
         })
-    
-   
-        # purchase_invoice = frappe.new_doc('Purchase Invoice')
-        # purchase_invoice.supplier = supplier_doc.name
-        # purchase_invoice.posting_date = invoice_details['InvoiceDate']
-        # purchase_invoice.due_date = payment_information['PaymentDueDate']
-        # purchase_invoice.bill_no = invoice_details['InvoiceNumber']
-        # purchase_invoice.bill_date = invoice_details['InvoiceDate']
+        
     else:
         purchase_invoice = frappe.get_doc('Purchase Invoice', purchase_invoice)
 
     # Adiciona os itens ao Purchase Invoice
     items = []
     for item in items_purchased:
-        print(item)
         item_doc_name = create_item(item['ItemNumber'], item['Description'], supplier)
-        item_doc = ("Item", item_doc_name)
-        print(item_doc_name)
-        po_item = create_purchase_invoice_doc_item(item_doc.name,item["Quantity"], item_doc.uom, item["UnitPrice"])
+        item_doc = frappe.get_doc("Item", item_doc_name)
+        po_item = create_purchase_invoice_doc_item(item_doc.name,float(item["Quantity"]), item_doc.stock_uom, float(item["UnitPrice"]))
         items.append(po_item)
-
-
+    
+    #Append Items to PI
+    purchase_invoice.append('items', po_item)
         
 
     # Definy the total and tax amount
@@ -247,12 +238,13 @@ def create_item(item_code, item_name, supplier, item_group='All Item Groups', st
         print(f"Item '{item_code}' already exists.")
         return frappe.get_doc("Item",item_code).name
 
-def create_Purchase_invoice_doc_item(item_code,item_qty, item_uom, item_rate ):
+def create_purchase_invoice_doc_item(item_code,qty, uom, rate ):
 		return frappe.get_doc({
 			"doctype": "Purchase Invoice Item",
 			"item_code": item_code,
 			"item_name": item_code,
 			"qty": qty,
 			"uom": uom,
-			"rate": rate
+			"rate": rate,
+            "amount":qty*rate
 		})
