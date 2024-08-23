@@ -209,7 +209,7 @@ def use_openai(doc, prompt, ai_name, background=True):
         if chat_response.choices:
             function_call = chat_response.choices[0].message.function_call
             if function_call:
-                resp = json.loads(function_call.arguments)
+                resp = function_call.arguments
             else:
                 resp = ""
         else:
