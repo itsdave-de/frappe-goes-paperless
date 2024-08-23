@@ -158,124 +158,6 @@ def call_ai(ai, prompt, doc, background=True):
                 return do_ai
 
 
-response_format = response_format = {
-    "type": "object",
-    "properties": {
-        "invoice_details": {
-            "type": "object",
-            "properties": {
-                "invoice_number": { "type": "string" },
-                "invoice_date": { "type": "string" },
-                "customer_number": { "type": "string" },
-                "customer_name": { "type": "string" },
-                "customer_address": {
-                    "type": "object",
-                    "properties": {
-                        "street": { "type": "string" },
-                        "city": { "type": "string" },
-                        "postal_code": { "type": "string" },
-                        "country": { "type": "string" }
-                    }
-                },
-                "contact_person": { "type": "string" },
-                "contact_phone": { "type": "string" },
-                "supplier_name": { "type": "string" },
-                "supplier_address": {
-                    "type": "object",
-                    "properties": {
-                        "street": { "type": "string" },
-                        "city": { "type": "string" },
-                        "postal_code": { "type": "string" },
-                        "country": { "type": "string" }
-                    }
-                },
-                "order_number": { "type": "string" },
-                "delivery_date": { "type": "string" },
-                "remarks": { "type": "string" }
-            }
-        },
-        "items_purchased": {
-            "type": "object",
-            "properties": {
-                "item_list": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "item_number": { "type": "string" },
-                            "description": { "type": "string" },
-                            "quantity": { "type": "number" },
-                            "unit_price": { "type": "number" },
-                            "total": { "type": "number" },
-                            "country_of_origin": { "type": "string" },
-                            "weight_gross_net": { "type": "string" },
-                            "tariff_code": { "type": "string" }
-                        }
-                    }
-                }
-            }
-        },
-        "financial_summary": {
-            "type": "object",
-            "properties": {
-                "total_net_amount": { "type": "number" },
-                "vat_tax_breakdown": {
-                    "type": "object",
-                    "properties": {
-                        "vat_tax_list": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "type": { "type": "string" },
-                                    "rate": { "type": "number" },
-                                    "amount": { "type": "number" }
-                                }
-                            }
-                        }
-                    }
-                },
-                "total_amount_due": { "type": "number" },
-                "financial_check_passed": { "type": "boolean" }
-            }
-        },
-        "payment_information": {
-            "type": "object",
-            "properties": {
-            "payment_due_date": { "type": "string" },
-            "payment_method": { "type": "string" },
-            "bank_details": {
-                "type": "object",
-                "properties": {
-                    "bank_1": {
-                        "type": "object",
-                        "properties": {
-                            "iban": { "type": "string" },
-                            "bank_name": { "type": "string" },
-                            "bic": { "type": "string" }
-                        }
-                    },
-                    "bank_2": {
-                        "type": "object",
-                        "properties": {
-                            "iban": { "type": "string" },
-                            "bank_name": { "type": "string" },
-                            "bic": { "type": "string" }
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "additional_information": {
-        "type": "object",
-        "properties": {
-            "factoring_information": { "type": "string" }
-        }
-    }
-    }
-}
-
 def use_openai(doc, prompt, ai_name, background=True):
     print('Initiate get ai data ...')
 
@@ -304,6 +186,7 @@ def use_openai(doc, prompt, ai_name, background=True):
             resp = ""
     elif prompt.ai_output_mode == 'Structured Output (JSON)':
         effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
+        response_format = json.loads(prompt.json_scema)
         chat_response = client.chat.completions.create(
             model="gpt-4o-2024-08-06",
             messages=[
