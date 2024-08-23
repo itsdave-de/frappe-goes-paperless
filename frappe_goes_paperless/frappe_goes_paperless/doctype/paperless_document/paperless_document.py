@@ -200,7 +200,7 @@ def use_openai(doc, prompt, ai_name, background=True):
                 {
                     "name": "generate_invoice",
                     "description": "Generates an invoice based on the provided schema.",
-                    "parameters": json_schema
+                    "parameters": prompt.json_scema
                 }
             ],
             function_call={"name": "generate_invoice"}
