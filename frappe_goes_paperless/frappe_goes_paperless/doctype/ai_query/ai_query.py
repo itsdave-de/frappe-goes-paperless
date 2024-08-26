@@ -52,12 +52,6 @@ def create_supplier(doc):
             'supplier_type': 'Company'
         })
         supplier.insert()
-        # Update AI Query with supplier
-        ai_query_doc = frappe.get_doc('AI Query', doc.get('name'))
-        ai_query_doc.supplier = supplier.name
-        ai_query_doc.save()
-        # commit database
-        frappe.db.commit()
         print(f"Supplier '{supplier.supplier_name}' created successfully!")
         # supplier = frappe.new_doc('Supplier')
         # supplier.supplier_name = invoice_details['SupplierName']
@@ -68,6 +62,12 @@ def create_supplier(doc):
     else:
         supplier = frappe.get_doc('Supplier', supplier)
         return_msg = 'Supplier already exists, updated successfully'
+    # Update AI Query with supplier
+    ai_query_doc = frappe.get_doc('AI Query', doc.get('name'))
+    ai_query_doc.supplier = supplier.name
+    ai_query_doc.save()
+    # commit database
+    frappe.db.commit()
 
     # Create a new contact by json if not exists
     contactPerson = invoice_details.get('ContactPerson')
