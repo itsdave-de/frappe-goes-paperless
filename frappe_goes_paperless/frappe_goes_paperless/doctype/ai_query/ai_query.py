@@ -58,7 +58,7 @@ def create_supplier(doc):
         # supplier.supplier_group = 'All Supplier Groups'
         # supplier.supplier_type = 'Company'
         # supplier.insert()
-        # return_msg = 'Contact created successfully'
+        return_msg = 'Supplier created successfully'
     else:
         supplier = frappe.get_doc('Supplier', supplier)
         return_msg = 'Supplier already exists, updated successfully'
