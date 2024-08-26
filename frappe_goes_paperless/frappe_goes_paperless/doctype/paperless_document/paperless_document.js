@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Paperless Document", {
     refresh: function(frm) {
+/*
         frm.add_custom_button(__('Get AI data'), () => {
             frappe.show_alert('Starting query in AI...');
             frappe.call({
@@ -17,6 +18,7 @@ frappe.ui.form.on("Paperless Document", {
                 }
             });
         }, __("Actions"));
+*/
         frm.add_custom_button(__('Open document on Paperless'), () => {
             this.window.open('http://10.251.0.55:8000/documents/' + frm.doc.paperless_document_id + '/details', '_blank');
         }, __("Actions"));
