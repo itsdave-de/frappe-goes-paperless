@@ -194,7 +194,7 @@ def create_purchase_invoice(doc):
             'bill_date': invoice_details['InvoiceDate'],
             'items': []
         })
-        
+        purchase_invoice.insert()
     else:
         purchase_invoice = frappe.get_doc('Purchase Invoice', purchase_invoice_list[0].name)
 
@@ -206,7 +206,7 @@ def create_purchase_invoice(doc):
         po_item = create_purchase_invoice_doc_item(item_doc.name,float(item["Quantity"]), item_doc.stock_uom, float(item["UnitPrice"]))
         items.append(po_item)
         #Append Items to PI
-        check_exists = [i for _, i in purchase_invoice.items() if i == po_item]
+        check_exists = [i for i in purchase_invoice.items if i.item_code == po_item.item_code]
         if not check_exists:
             purchase_invoice.append('items', po_item)
 
