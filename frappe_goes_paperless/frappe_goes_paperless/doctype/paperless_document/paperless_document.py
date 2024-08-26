@@ -4,11 +4,9 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils.password import get_decrypted_password
-from frappe.utils.background_jobs import get_job_status
 import requests
 import re
 import json
-from pydantic import BaseModel
 from openai import OpenAI
 
 
@@ -47,43 +45,6 @@ def get_paperless_fulltext(document_id):
             return response.json()['content']
     return None
 
-
-def get_paperless_ids():
-    server_url, api_token = get_paperless_settings()
-    response = requests.get(
-        f"{server_url.rstrip('/')}/api/documents/",
-        headers = {
-            "Authorization": f"Token {api_token}",
-            "Content-Type": "application/json"
-        }
-    )
-    if response.status_code == 200:
-        if len(response.json()) > 0:
-            return response.json()['all']
-    return None
-
-# Get document thumbprint image
-def get_paperless_docthumb(id, docname):
-    server_url, api_token = get_paperless_settings()
-    response = requests.get(
-        f"{server_url.rstrip('/')}/api/documents/{id}/thumb/",
-        headers = {
-            "Authorization": f"Token {api_token}"
-        }
-    )
-    if response.status_code == 200:
-        if response.content:
-            file_doc = frappe.new_doc("File")
-            file_doc.file_name = f"docthumb-{id}.webp"
-            file_doc.attached_to_doctype = 'Paperless Document'
-            file_doc.attached_to_name = docname
-            file_doc.content = response.content
-            file_doc.decode = False
-            file_doc.is_private = False
-            file_doc.insert(ignore_permissions=True)
-            frappe.db.commit()
-            return file_doc.file_url
-    return None
 
 # Get data from paperless-ngx
 def paperless_api(place, id):
@@ -250,55 +211,3 @@ def use_openai(doc, prompt, ai_name, background=True):
         return f'AI query sucessfull. <a href="{frappe.utils.get_url()}/app/ai-query/{new_query.name}">Check out response</a>.'
 
 
-@frappe.whitelist()
-def sync_documents():
-    # Get all ids from paperless
-    ids = get_paperless_ids()
-    # get all ids from frappe
-    docs = frappe.get_all('Paperless Document', fields=['paperless_document_id'])
-    # Get a array with missing ids (compare the two lists of ids)
-    mis = list(set(ids) - set([int(id['paperless_document_id']) for id in docs if id.get('paperless_document_id') is not None]))
-    for id in mis:
-        try:
-            get_document = paperless_api('documents', id)
-            # Get frappe doctype by Paperless doctype
-            response = paperless_api('document_types', get_document['document_type'])
-            if response is not None:
-                paperless_doctype = response['name']
-            else:
-                paperless_doctype = None
-            paperless_doctype = paperless_doctype['name'] if paperless_doctype else None
-            frappe_doctype = frappe.get_all(
-                'Paperless Document Type Mapping',
-                fields = ['frappe_doctype'],
-                filters = {'paperless_document_type': paperless_doctype}
-            )
-            frappe_doctype = frappe_doctype[0]['frappe_doctype'] if len(frappe_doctype) > 0 else None
-            # Get prompt from frappe doctype
-            frappe_prompt = frappe.get_all(
-                'AI Prompt',
-                fields = ['name'],
-                filters = {'for_doctype': frappe_doctype}
-            )
-            frappe_prompt = frappe_prompt[0]['name'] if len(frappe_prompt) > 0 else None
-            # add document
-            new_doc = frappe.new_doc("Paperless Document")
-            new_doc.paperless_document_id = id
-            new_doc.paperless_correspondent = paperless_api('correspondents', get_document['correspondent'])['name']
-            new_doc.paperless_documenttype = paperless_doctype
-            new_doc.status = "new"
-            new_doc.frappe_doctype = frappe_doctype
-            new_doc.ai_prompt = frappe_prompt
-            new_doc.document_fulltext = get_document['content']
-            new_doc.save()
-            thumbimage = get_paperless_docthumb(id, new_doc.name)
-            if thumbimage:
-                new_doc.thumbprint = thumbimage
-            new_doc.save()
-            frappe.db.commit()
-            print(f"Document added -> {get_document['title']}")
-        except Exception as e:
-            # Handle HTTP errors
-            msg = f"Failed to fetch documents from Paperless-ngx: {e}"
-            print(msg)
-            frappe.log_error(msg)
