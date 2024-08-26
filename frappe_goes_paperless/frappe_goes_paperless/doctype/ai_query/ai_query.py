@@ -96,7 +96,6 @@ def create_supplier(doc):
         })
         contact.insert()
     else:
-        contact = frappe.get_doc('Contact', contact)
         if not contact.links.get('link_name') == supplier.name:
             contact.append('links', {
                 'link_doctype': 'Supplier',
