@@ -17,8 +17,8 @@ frappe.ui.form.on("AI Query", {
                 callback: function(r) {
                     if (r.message) {
                         // Display the response as a message
+                        frm.refresh();
                         frappe.msgprint(r.message);
-                        frm.refresh_field('supplier');
                     } else {
                         frappe.msgprint(__('No response received.'));
                     }
@@ -40,6 +40,7 @@ frappe.ui.form.on("AI Query", {
                 callback: function(r) {
                     if (r.message) {
                         // Display the response as a message
+                        frm.refresh();
                         frappe.msgprint(r.message);
                     } else {
                         frappe.msgprint(__('No response received.'));
