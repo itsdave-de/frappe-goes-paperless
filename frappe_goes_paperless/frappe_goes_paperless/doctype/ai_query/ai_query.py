@@ -206,7 +206,7 @@ def create_purchase_invoice(doc):
         po_item = create_purchase_invoice_doc_item(item_doc.name,float(item["Quantity"]), item_doc.stock_uom, float(item["UnitPrice"]))
         items.append(po_item)
         #Append Items to PI
-        check_exists = [s for s in purchase_invoice.items if s.item == po_item.item]
+        check_exists = [s for s in purchase_invoice.items if s == po_item]
         if not check_exists:
             purchase_invoice.append('items', po_item)
 
