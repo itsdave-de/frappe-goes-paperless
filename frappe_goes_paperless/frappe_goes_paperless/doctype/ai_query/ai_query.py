@@ -207,7 +207,7 @@ def create_purchase_invoice(doc):
         items.append(po_item)
     
     #Append Items to PI
-    purchase_invoice.append('items', po_item)
+    purchase_invoice.append('items', items)
         
 
     # Definy the total and tax amount
@@ -243,7 +243,6 @@ def create_item(item_code, item_name, supplier, item_group='All Item Groups', st
             "default_supplier": supplier,
             'is_stock_item': 1,  # Set as a stock item
             'include_item_in_manufacturing': 0
-            
         })
         item.insert()
         frappe.db.commit()
@@ -253,7 +252,7 @@ def create_item(item_code, item_name, supplier, item_group='All Item Groups', st
         print(f"Item '{item_code}' already exists.")
         return frappe.get_doc("Item",item_code).name
 
-def create_purchase_invoice_doc_item(item_code,qty, uom, rate ):
+def create_purchase_invoice_doc_item(item_code, qty, uom, rate ):
     return frappe.get_doc({
         "doctype": "Purchase Invoice Item",
         "item_code": item_code,
