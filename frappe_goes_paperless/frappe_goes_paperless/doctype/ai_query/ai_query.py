@@ -73,6 +73,7 @@ def create_supplier(doc):
             contactPerson = invoice_details['SupplierName'].split(' ')
         else:
             contactPerson = ['Unknown', 'Unknown']
+    print(contactPerson)
     contact = frappe.db.get_value(
         'Contact', 
         {
