@@ -70,11 +70,9 @@ def create_supplier(doc):
         contactPerson = contactPerson.split(' ')
     else:
         if invoice_details.get('SupplierName'):
-            print('Getting contactPerson from SupplierName...')
             contactPerson = invoice_details['SupplierName'].split(' ')
         else:
             contactPerson = ['Unknown', 'Unknown']
-    print(f"Contact Person: {contactPerson}")
     contact = frappe.db.get_value(
         'Contact', 
         {
@@ -83,6 +81,7 @@ def create_supplier(doc):
         }
     )
     if not contact:
+        contact = frappe.new_doc('Contact')
         contact.first_name = contactPerson[0]
         contact.last_name = contactPerson[1] if len(contactPerson) > 1 else ''
         contact.phone = invoice_details['ContactPhone'] if invoice_details.get('ContactPhone') else ''
