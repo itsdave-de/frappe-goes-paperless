@@ -24,9 +24,13 @@ frappe.ui.form.on("Paperless Document", {
         }, __("Actions"));
 
         // Add a click function to open the document in Paperless from the thumbprint preview
-        frm.fields_dict.thumbprint_preview.$wrapper.on('click', function() {
-            open_document_on_paperless(frm.doc.paperless_document_id);
-        });
+        let image_field = frm.fields_dict['thumbprint_preview'].$wrapper.find('img');
+        if (image_field.length) {
+            image_field.css('cursor', 'pointer');
+            image_field.on('click', function() {
+                open_document_on_paperless(frm.doc.paperless_document_id);
+            });
+        }
 
         // Add a custom button named "Query AI"
         frm.add_custom_button(__('Query AI'), function() {
