@@ -196,10 +196,10 @@ def create_purchase_invoice(doc):
         
 
     # Definy the total and tax amount
-    #purchase_invoice.total = financial_summary['TotalNetAmount']
-    #purchase_invoice.total_taxes_and_charges = sum(
-    #    tax['Amount'] for tax in financial_summary['VAT/TAXBreakdown']['VAT/TAXList']
-    #)
+    purchase_invoice.total = financial_summary['TotalNetAmount']
+    purchase_invoice.total_taxes_and_charges = sum(
+        tax['Amount'] for tax in financial_summary['VAT/TAXBreakdown']['VAT/TAXList']
+    )
 
     # Define the write off amount
     #purchase_invoice.base_grand_total = purchase_invoice.base_grand_total if not None else 0.0
