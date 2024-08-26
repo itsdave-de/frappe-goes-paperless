@@ -128,24 +128,7 @@ def use_openai(doc, prompt, ai_name, background=True):
     # get prompt
     prompt = frappe.get_doc("AI Prompt", prompt)
     # check AI mode
-    if prompt.ai_output_mode == 'Chat':
-        # concat fulltext and prompt
-        effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
-        # init chat
-        chat_completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": effective_prompt,
-                }
-            ],
-            model="chatgpt-4o-latest",
-        )
-        if chat_completion.choices:
-            resp = chat_completion.choices[0].message.content
-        else:
-            resp = ""
-    elif prompt.ai_output_mode == 'Structured Output (JSON)':
+    if prompt.ai_output_mode == 'Structured Output (JSON)':
         effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
         json_schema = json.loads(prompt.json_scema) if type(prompt.json_scema) == str else prompt.json_scema
         chat_response = client.chat.completions.create(
@@ -170,7 +153,25 @@ def use_openai(doc, prompt, ai_name, background=True):
             else:
                 resp = ""
         else:
-            resp = ""        
+            resp = ""
+    # else if AI mode is Chat or None
+    else:
+        # concat fulltext and prompt
+        effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
+        # init chat
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": effective_prompt,
+                }
+            ],
+            model="chatgpt-4o-latest",
+        )
+        if chat_completion.choices:
+            resp = chat_completion.choices[0].message.content
+        else:
+            resp = ""
 
     # add doctype AI Query
     new_query = frappe.new_doc("AI Query")
