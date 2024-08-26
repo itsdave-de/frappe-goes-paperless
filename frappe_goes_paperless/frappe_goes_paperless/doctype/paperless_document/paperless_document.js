@@ -20,8 +20,13 @@ frappe.ui.form.on("Paperless Document", {
         }, __("Actions"));
 */
         frm.add_custom_button(__('Open document on Paperless'), () => {
-            this.window.open('http://10.251.0.55:8000/documents/' + frm.doc.paperless_document_id + '/details', '_blank');
+            open_document_on_paperless(frm.doc.paperless_document_id);
         }, __("Actions"));
+
+        // Add a click function to open the document in Paperless from the thumbprint preview
+        frm.fields_dict.thumbprint_preview.$wrapper.on('click', function() {
+            open_document_on_paperless(frm.doc.paperless_document_id);
+        });
 
         // Add a custom button named "Query AI"
         frm.add_custom_button(__('Query AI'), function() {
@@ -109,3 +114,6 @@ function verificarStatusJob(jobId, frm) {
     });
 }
 
+function open_document_on_paperless(document_id) {
+    this.window.open('http://10.251.0.55:8000/documents/' + document_id + '/details', '_blank');
+}
