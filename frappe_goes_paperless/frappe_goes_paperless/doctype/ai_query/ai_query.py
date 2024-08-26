@@ -65,17 +65,24 @@ def create_supplier(doc):
         return_msg = 'Contact already exists, updated successfully'
 
     # Create a new contact by json if not exists
+    contactPerson = invoice_details.get('ContactPerson')
+    if contactPerson:
+        contactPerson = contactPerson.split(' ')
+    else:
+        if invoice_details.get('SupplierName'):
+            contactPerson = invoice_details['SupplierName'].split(' ')
+        else:
+            contactPerson = ['Unknown', 'Unknown']
     contact = frappe.db.get_value(
         'Contact', 
         {
-            'first_name': invoice_details['ContactPerson'].split(' ')[0],
-            'last_name': invoice_details['ContactPerson'].split(' ')[1]
+            'first_name': contactPerson[0],
+            'last_name': contactPerson[1] if len(contactPerson) > 1 else ''
         }
     )
     if not contact:
-        contact = frappe.new_doc('Contact')
-        contact.first_name = invoice_details['ContactPerson'].split(' ')[0]
-        contact.last_name = invoice_details['ContactPerson'].split(' ')[1]
+        contact.first_name = contactPerson[0]
+        contact.last_name = contactPerson[1] if len(contactPerson) > 1 else ''
         contact.phone = invoice_details['ContactPhone'] if invoice_details.get('ContactPhone') else ''
         contact.append('links', {
             'link_doctype': 'Supplier',
