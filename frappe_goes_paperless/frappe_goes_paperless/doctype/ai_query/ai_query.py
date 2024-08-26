@@ -52,6 +52,11 @@ def create_supplier(doc):
             'supplier_type': 'Company'
         })
         supplier.insert()
+        # Update AI Query with supplier
+        ai_query_doc = frappe.get_doc('AI Query', doc.get('name'))
+        ai_query_doc.supplier = supplier.name
+        ai_query_doc.save()
+        # commit database
         frappe.db.commit()
         print(f"Supplier '{supplier.supplier_name}' created successfully!")
         # supplier = frappe.new_doc('Supplier')
@@ -62,7 +67,7 @@ def create_supplier(doc):
         # return_msg = 'Contact created successfully'
     else:
         supplier = frappe.get_doc('Supplier', supplier)
-        return_msg = 'Contact already exists, updated successfully'
+        return_msg = 'Supplier already exists, updated successfully'
 
     # Create a new contact by json if not exists
     contactPerson = invoice_details.get('ContactPerson')
@@ -189,7 +194,7 @@ def create_purchase_invoice(doc):
         })
         
     else:
-        purchase_invoice = frappe.get_doc('Purchase Invoice', purchase_invoice)
+        purchase_invoice = frappe.get_doc('Purchase Invoice', purchase_invoice_list[0].name)
 
     # Adiciona os itens ao Purchase Invoice
     items = []
@@ -247,12 +252,12 @@ def create_item(item_code, item_name, supplier, item_group='All Item Groups', st
         return frappe.get_doc("Item",item_code).name
 
 def create_purchase_invoice_doc_item(item_code,qty, uom, rate ):
-		return frappe.get_doc({
-			"doctype": "Purchase Invoice Item",
-			"item_code": item_code,
-			"item_name": item_code,
-			"qty": qty,
-			"uom": uom,
-			"rate": rate,
-            "amount":qty*rate
-		})
+    return frappe.get_doc({
+        "doctype": "Purchase Invoice Item",
+        "item_code": item_code,
+        "item_name": item_code,
+        "qty": qty,
+        "uom": uom,
+        "rate": rate,
+        "amount":qty*rate
+    })
