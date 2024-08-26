@@ -96,6 +96,7 @@ def create_supplier(doc):
         })
         contact.insert()
     else:
+        contact = frappe.get_doc('Contact', contact)
         check_exists = [s for s in contact.links if s.link_name == supplier.name]
         if not check_exists:
             contact.append('links', {
