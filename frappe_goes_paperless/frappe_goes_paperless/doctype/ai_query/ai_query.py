@@ -219,6 +219,11 @@ def create_purchase_invoice(doc):
 
     # save data
     purchase_invoice.save()
+    # Update AI Query with supplier
+    ai_query_doc = frappe.get_doc('AI Query', doc.get('name'))
+    ai_query_doc.document = purchase_invoice.name
+    ai_query_doc.save()
+    # commit database
     frappe.db.commit()
 
 def get_country(code_country):
