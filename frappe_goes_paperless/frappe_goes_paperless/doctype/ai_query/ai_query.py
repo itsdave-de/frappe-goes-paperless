@@ -209,6 +209,8 @@ def create_purchase_invoice(doc):
         check_exists = [i for i in purchase_invoice.items if i.item_code == po_item.item_code]
         if not check_exists:
             purchase_invoice.append('items', po_item)
+        else:
+            print(f"Item '{po_item.item_code}' already exists in Purchase Invoice.")
 
     # Definy the total and tax amount
     purchase_invoice.total = financial_summary['TotalNetAmount']
@@ -255,7 +257,7 @@ def create_item(item_code, item_name, supplier, item_group='All Item Groups', st
         return item.name
     else:
         print(f"Item '{item_code}' already exists.")
-        return frappe.get_doc("Item",item_code).name
+        return frappe.get_doc("Item", item_code).name
 
 def create_purchase_invoice_doc_item(item_code, qty, uom, rate ):
     return frappe.get_doc({
