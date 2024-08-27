@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "AIPROMPT-.#####",
  "creation": "2024-08-14 16:44:52.734243",
@@ -53,7 +54,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-22 12:05:03.219862",
+ "modified": "2024-08-26 23:48:50.696016",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "AI Prompt",
@@ -73,6 +74,7 @@
    "write": 1
   }
  ],
+ "search_fields": "caption",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

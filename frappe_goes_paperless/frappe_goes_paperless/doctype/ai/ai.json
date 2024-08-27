@@ -41,7 +41,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-20 12:00:56.279043",
+ "modified": "2024-08-26 23:03:42.521428",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "AI",
@@ -61,6 +61,7 @@
    "write": 1
   }
  ],
+ "search_fields": "caption",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
