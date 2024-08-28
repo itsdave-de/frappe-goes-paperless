@@ -4,8 +4,8 @@
 import frappe
 from frappe.model.document import Document
 import json
-
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from frappe_goes_paperless.tools import get_paperless_settings
 
 class AIQuery(Document):
     pass
@@ -328,7 +328,8 @@ def create_purchase_invoice(doc):
             'paperless_document_id'
         )
         if paperless_document_id:
-            file_url = f"http://10.251.0.55:8000/api/documents/{paperless_document_id}/preview/"
+            paperless_server, _ = get_paperless_settings()
+            file_url = f"{paperless_server}/api/documents/{paperless_document_id}/preview/"
             if not frappe.db.exists(
                 'File', {
                     'file_url': file_url,
