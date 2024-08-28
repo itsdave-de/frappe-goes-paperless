@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 import json
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
-from frappe_goes_paperless.tools import get_paperless_settings
+from frappe_goes_paperless.frappe_goes_paperless.tools import get_paperless_settings
 
 class AIQuery(Document):
     pass
