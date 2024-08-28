@@ -193,13 +193,13 @@ def create_purchase_invoice(doc):
     doc = json.loads(doc)
 
     # Get JSON data
-    json_data = doc.get('ai_response_json')
+    json_data_str = doc.get('ai_response_json')
     
     # Validate JSON format
-    if not isinstance(json_data, str):
+    if not isinstance(json_data_str, str):
         frappe.throw('Invalid JSON format')
     try:
-        json_data = json.loads(json_data)
+        json_data = json.loads(json_data_str)
     except json.JSONDecodeError:
         frappe.throw('Invalid JSON format')
     
