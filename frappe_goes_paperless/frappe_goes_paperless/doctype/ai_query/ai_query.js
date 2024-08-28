@@ -9,7 +9,7 @@ frappe.ui.form.on("AI Query", {
                 callback: function(r) {
                     if (r.message) {
                         // Display the response as a message
-                        this.location.reload();
+                        frm.reload_doc();
                         frappe.msgprint(r.message);
                     } else {
                         frappe.msgprint(__('No response received.'));

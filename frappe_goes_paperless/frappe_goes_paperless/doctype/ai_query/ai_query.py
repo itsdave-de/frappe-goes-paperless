@@ -10,6 +10,11 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 class AIQuery(Document):
     pass
 
+def get_country(code_country):
+    # Get country by code
+    country = frappe.db.get_value('Country', {'code': code_country.lower()})
+    return country
+
 @frappe.whitelist()
 def create_supplier(doc):
     doc = json.loads(doc)
@@ -35,6 +40,10 @@ def create_supplier(doc):
     # If supplier not found by tax_id, fall back to supplier_name
     if not supplier:
         supplier = frappe.db.get_value('Supplier', {'supplier_name': supplier_name}, 'name')
+
+    # When its there, we need to fetch the Document
+    if supplier:
+        supplier = frappe.get_doc("Supplier", supplier)
 
     if not supplier:
         # Create a new supplier if not found
@@ -143,6 +152,42 @@ def create_or_update_contact(supplier, invoice_details, address_name):
     supplier.supplier_primary_contact = contact.name
     supplier.save()
 
+def create_or_update_address(supplier, invoice_details):
+    address = frappe.db.get_value(
+        'Address',
+        {
+            'address_line1': invoice_details['SupplierAddress']['Street'],
+            'city': invoice_details['SupplierAddress']['City'],
+            'pincode': invoice_details['SupplierAddress']['PostalCode'],
+            'country': get_country(invoice_details['SupplierAddress']['Country'])
+        }
+    )
+    if not address:
+        address = frappe.new_doc('Address')
+        address.address_title = f"{supplier.supplier_name} - Main Address"
+        address.address_line1 = invoice_details['SupplierAddress']['Street']
+        address.city = invoice_details['SupplierAddress']['City']
+        address.pincode = invoice_details['SupplierAddress']['PostalCode']
+        address.country = get_country(invoice_details['SupplierAddress']['Country'])
+        address.append('links', {
+            'link_doctype': 'Supplier',
+            'link_name': supplier.name
+        })
+        address.insert()
+    else:
+        address_doc = frappe.get_doc('Address', address)
+        if not any(link.link_name == supplier.name for link in address_doc.links):
+            address_doc.append('links', {
+                'link_doctype': 'Supplier',
+                'link_name': supplier.name
+            })
+            address_doc.save()
+
+    supplier.supplier_primary_address = address.name
+    supplier.save()
+
+    return address.name
+
 @frappe.whitelist()
 def create_purchase_invoice(doc):
     doc = json.loads(doc)
@@ -223,14 +268,20 @@ def create_purchase_invoice(doc):
             )
             item_doc = frappe.get_doc("Item", item_doc_name)
             
-            # Calculate the rate per unit after discount
-            calculated_rate = float(item["Total"]) / float(item["Quantity"])
-            
-            # Calculate the discount amount
-            discount_amount = (float(item["UnitPrice"]) * float(item["Quantity"])) - float(item["Total"])
-
-            # Calculate the discount percentage
-            discount_percentage = (discount_amount / (float(item["UnitPrice"]) * float(item["Quantity"]))) * 100
+            # Check if quantity and unit price are zero
+            if float(item["Quantity"]) == 0 or float(item["UnitPrice"]) == 0:
+                calculated_rate = 0
+                discount_amount = 0
+                discount_percentage = 0
+            else:
+                # Calculate the rate per unit after discount
+                calculated_rate = float(item["Total"]) / float(item["Quantity"])
+                
+                # Calculate the discount amount
+                discount_amount = (float(item["UnitPrice"]) * float(item["Quantity"])) - float(item["Total"])
+                
+                # Calculate the discount percentage
+                discount_percentage = (discount_amount / (float(item["UnitPrice"]) * float(item["Quantity"]))) * 100
             
             # Create a Purchase Invoice Item entry
             po_item = create_purchase_invoice_doc_item(
@@ -259,6 +310,7 @@ def create_purchase_invoice(doc):
             
             # Add the item to the Purchase Invoice without checking for duplicates
             purchase_invoice.append('items', po_item)
+
 
         # Save the Purchase Invoice, which fills taxes_and_charges
         purchase_invoice.insert()
