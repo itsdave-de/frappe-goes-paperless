@@ -257,6 +257,20 @@ def create_purchase_invoice(doc):
             'items': []
         })
 
+        # Attach link to paperless preview
+        paperless_document_id = frappe.db.get_value(
+            'Paperless Document',
+            { 'name': doc.get('paperless_doc') },
+            'paperless_document_id'
+        )
+        if paperless_document_id:
+            file_doc = frappe.new_doc("File")
+            file_doc.file_url = f"http://10.251.0.55:8000/api/documents/{paperless_document_id}/preview/"
+            file_doc.is_private = 1
+            file_doc.attached_to_doctype = "Purchase Invoice"
+            file_doc.attached_to_name = purchase_invoice.name
+            file_doc.save()
+
         # Check and add items to the Purchase Invoice
         for item in items_purchased:
             # Ensure the item exists, create if not
