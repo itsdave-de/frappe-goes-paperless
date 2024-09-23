@@ -98,21 +98,22 @@ def create_or_update_contact(supplier, invoice_details, address_name):
     contact_phone = invoice_details.get("SupplierContactPhone", "")
     contact_email = invoice_details.get("SupplierContactEmail", "")
 
-    contact = frappe.db.get_value(
+    # Fetch the contact based on the first and last name
+    contact_name = frappe.db.get_value(
         "Contact",
         {
             "first_name": contact_person[0],
             "last_name": contact_person[1] if len(contact_person) > 1 else "",
         },
+        "name"  # Fetch the contact name, not the full document
     )
 
-    if not contact:
+    # If no contact found, create a new one
+    if not contact_name:
         contact = frappe.new_doc("Contact")
         contact.first_name = contact_person[0]
         contact.last_name = contact_person[1] if len(contact_person) > 1 else ""
-        contact.company_name = (
-            supplier.supplier_name
-        )  # Link the contact to the supplier's name
+        contact.company_name = supplier.supplier_name  # Link the contact to the supplier's name
         contact.address = address_name  # Link the contact to the address
 
         contact.append(
@@ -126,28 +127,28 @@ def create_or_update_contact(supplier, invoice_details, address_name):
             contact.append("email_ids", {"email_id": contact_email, "is_primary": 1})
 
         contact.insert()
+        contact_name = contact.name  # Ensure we set the correct contact name
     else:
-        contact_doc = frappe.get_doc("Contact", contact)
-        contact_doc.company_name = (
-            supplier.supplier_name
-        )  # Ensure the company name is updated
-        contact_doc.address = address_name  # Ensure the address is linked
+        # Fetch the existing contact as a document
+        contact = frappe.get_doc("Contact", contact_name)
+        contact.company_name = supplier.supplier_name  # Ensure the company name is updated
+        contact.address = address_name  # Ensure the address is linked
 
         if contact_phone:
             existing_phone = next(
                 (
                     phone
-                    for phone in contact_doc.phone_nos
+                    for phone in contact.phone_nos
                     if phone.phone == contact_phone
                 ),
                 None,
             )
             if not existing_phone:
-                contact_doc.append(
+                contact.append(
                     "phone_nos",
                     {
                         "phone": contact_phone,
-                        "is_primary_phone": 1 if not contact_doc.phone_nos else 0,
+                        "is_primary_phone": 1 if not contact.phone_nos else 0,
                     },
                 )
 
@@ -155,28 +156,30 @@ def create_or_update_contact(supplier, invoice_details, address_name):
             existing_email = next(
                 (
                     email
-                    for email in contact_doc.email_ids
+                    for email in contact.email_ids
                     if email.email_id == contact_email
                 ),
                 None,
             )
             if not existing_email:
-                contact_doc.append(
+                contact.append(
                     "email_ids",
                     {
                         "email_id": contact_email,
-                        "is_primary": 1 if not contact_doc.email_ids else 0,
+                        "is_primary": 1 if not contact.email_ids else 0,
                     },
                 )
 
-        if not any(link.link_name == supplier.name for link in contact_doc.links):
-            contact_doc.append(
+        if not any(link.link_name == supplier.name for link in contact.links):
+            contact.append(
                 "links", {"link_doctype": "Supplier", "link_name": supplier.name}
             )
-        contact_doc.save()
+        contact.save()
 
-    supplier.supplier_primary_contact = contact.name
+    # Assign the contact name to supplier's primary contact
+    supplier.supplier_primary_contact = contact_name
     supplier.save()
+
 
 
 def create_or_update_address(supplier, invoice_details):
