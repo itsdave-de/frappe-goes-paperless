@@ -15,8 +15,6 @@
   "thumbprint",
   "thumbprint_preview",
   "section_break_czaa",
-  "ai_response",
-  "ai_response_json",
   "document_fulltext"
  ],
  "fields": [
@@ -36,16 +34,6 @@
    "fieldname": "paperless_documenttype",
    "fieldtype": "Data",
    "label": "Paperless Documenttype"
-  },
-  {
-   "fieldname": "ai_response",
-   "fieldtype": "Long Text",
-   "label": "AI Response"
-  },
-  {
-   "fieldname": "ai_response_json",
-   "fieldtype": "Long Text",
-   "label": "AI Response JSON"
   },
   {
    "fieldname": "frappe_doctype",
@@ -87,7 +75,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-26 11:43:16.408315",
+ "modified": "2024-09-23 15:09:07.338292",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
