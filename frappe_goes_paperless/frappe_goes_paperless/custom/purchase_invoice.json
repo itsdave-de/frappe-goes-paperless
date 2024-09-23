@@ -1,0 +1,28 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Purchase Invoice",
+ "links": [
+  {
+   "creation": "2024-09-23 21:09:36.070226",
+   "custom": 1,
+   "docstatus": 0,
+   "group": "Archive",
+   "hidden": 0,
+   "idx": 0,
+   "is_child_table": 0,
+   "link_doctype": "Paperless Document",
+   "link_fieldname": "frappe_document",
+   "modified": "2024-09-23 21:18:49.459677",
+   "modified_by": "dev@itsdave.de",
+   "name": "2ob06gj9ol",
+   "owner": "dev@itsdave.de",
+   "parent": "Purchase Invoice",
+   "parent_doctype": null,
+   "parentfield": "links",
+   "parenttype": "Customize Form",
+   "table_fieldname": null
+  }
+ ],
+ "sync_on_migrate": 1
+}
