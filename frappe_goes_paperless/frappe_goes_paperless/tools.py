@@ -168,3 +168,8 @@ def job_status(jobid):
                 getStatus = status
                 break
     return getStatus
+
+
+@frappe.whitelist()
+def installed_apps():
+    return frappe.get_installed_apps()
