@@ -24,5 +24,30 @@
    "table_fieldname": null
   }
  ],
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2024-09-23 21:18:49.469608",
+   "default_value": null,
+   "doc_type": "Purchase Invoice",
+   "docstatus": 0,
+   "doctype_or_field": "DocType",
+   "field_name": null,
+   "idx": 0,
+   "is_system_generated": 0,
+   "modified": "2024-09-23 21:18:49.469608",
+   "modified_by": "dev@itsdave.de",
+   "module": null,
+   "name": "Purchase Invoice-main-links_order",
+   "owner": "dev@itsdave.de",
+   "property": "links_order",
+   "property_type": "Small Text",
+   "row_name": null,
+   "value": "[\"2ob06gj9ol\"]"
+  }
+ ],
  "sync_on_migrate": 1
 }
