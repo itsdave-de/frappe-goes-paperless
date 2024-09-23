@@ -49,7 +49,7 @@ frappe.ui.form.on("Paperless Document", {
 
                                 // Call the server-side method
                                 frappe.call({
-                                    method: 'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.call_ai',
+                                    method: 'ai_workflows.ai_workflows.doctype.ai_query.ai_query.call_ai',
                                     args: {
                                         ai: data.ai,
                                         prompt: data.ai_prompt,
