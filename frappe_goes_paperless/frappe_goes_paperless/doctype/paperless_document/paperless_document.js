@@ -23,6 +23,7 @@ frappe.ui.form.on("Paperless Document", {
                 const installed_apps = response.message;
 
                 if (installed_apps.includes('ai_workflows')) {
+                    // add a custom button to the form to execute an AI query
                     frm.add_custom_button(__('Query AI'), function () {
                         // Define the Dialog
                         let d = new frappe.ui.Dialog({
@@ -81,6 +82,9 @@ frappe.ui.form.on("Paperless Document", {
                         // Show the dialog
                         d.show();
                     });
+                } else {
+                    // Hide fields if AI app is not installed
+                    frm.toggle_display(['ai_response', 'ai_response_json'], false);
                 }
             }
         });
