@@ -14,3 +14,5 @@ def get_data():
                 }
             ]
         }
+    else:
+        return {}
