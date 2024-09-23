@@ -11,6 +11,7 @@
   "paperless_documenttype",
   "status",
   "frappe_doctype",
+  "frappe_document",
   "column_break_wieg",
   "thumbprint",
   "thumbprint_preview",
@@ -71,11 +72,17 @@
    "fieldname": "document_fulltext",
    "fieldtype": "Long Text",
    "label": "Document Fulltext"
+  },
+  {
+   "fieldname": "frappe_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Frappe Document",
+   "options": "frappe_doctype"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-23 15:09:07.338292",
+ "modified": "2024-09-23 21:07:55.297602",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
