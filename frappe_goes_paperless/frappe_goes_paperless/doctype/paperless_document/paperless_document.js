@@ -126,7 +126,12 @@ function open_document_on_paperless(document_id) {
             fieldname: 'paperless_ngx_server'
         },
         callback: function (response) {
-            this.window.open(response.paperless_ngx_server.replace(/\/$/, '') + '/documents/' + document_id + '/details', '_blank');
+            if (response && response.message && response.message.paperless_ngx_server) {
+                let server_url = response.message.paperless_ngx_server.replace(/\/$/, '');
+                window.open(server_url + '/documents/' + document_id + '/details', '_blank');
+            } else {
+                console.error("Paperless-ngx server URL not found.");
+            }
         }
     });
 }
