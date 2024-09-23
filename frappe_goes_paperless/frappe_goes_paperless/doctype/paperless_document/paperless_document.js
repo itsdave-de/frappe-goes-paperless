@@ -18,7 +18,7 @@ frappe.ui.form.on("Paperless Document", {
 
         // Add a custom button named "Query AI" if app AI Flow is installed
         frappe.call({
-            method: 'frappe_goes_paperless.frappe_goes_paperless.doctype.tools.installed_apps',
+            method: 'frappe_goes_paperless.frappe_goes_paperless.tools.installed_apps',
             callback: function (response) {
                 const installed_apps = response.message;
 
