@@ -4,218 +4,151 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils.password import get_decrypted_password
-from frappe.utils.background_jobs import get_job_status
-import requests
 import re
 import json
 from openai import OpenAI
 
 
-def get_paperless_settings():
-    settings = frappe.get_doc('Paperless-ngx Settings', 'Paperless-ngx Settings')
-    api_token = get_decrypted_password(
-        doctype='Paperless-ngx Settings',
-        name='Paperless-ngx Settings',
-        fieldname='api_token',
-        raise_exception=False
-    )
-    return settings.paperless_ngx_server, api_token
+class PaperlessDocument(Document):
+    pass
 
-def get_ai_settings():
+
+# Get settings from AI doctype settings
+def get_ai_settings(doc_ai):
+    doc_ai = frappe.get_doc("AI", doc_ai)
+
     api_key = get_decrypted_password(
-        doctype='AI Settings',
-        name='AI Settings',
-        fieldname='api_key',
-        raise_exception=False
+        doctype="AI", name=doc_ai.name, fieldname="api_key", raise_exception=False
     )
     return api_key
 
-def get_paperless_fulltext(document_id):
-	server_url, api_token = get_paperless_settings()
-	response = requests.get(
-        f"{server_url.rstrip('/')}/api/documents/{document_id}/",
-        headers = {
-			"Authorization": f"Token {api_token}",
-			"Content-Type": "application/json"
-		}
-	)
-	if response.status_code == 200:
-		if len(response.json()) > 0:
-			return response.json()['content']
-	return None
-
-
-def get_paperless_ids():
-	server_url, api_token = get_paperless_settings()
-	response = requests.get(
-        f"{server_url.rstrip('/')}/api/documents/",
-        headers = {
-			"Authorization": f"Token {api_token}",
-			"Content-Type": "application/json"
-		}
-	)
-	if response.status_code == 200:
-		if len(response.json()) > 0:
-			return response.json()['all']
-	return None
-
-# Get document thumbprint image
-def get_paperless_docthumb(id, docname):
-	server_url, api_token = get_paperless_settings()
-	response = requests.get(
-        f"{server_url.rstrip('/')}/api/documents/{id}/thumb/",
-        headers = {
-			"Authorization": f"Token {api_token}"
-		}
-	)
-	if response.status_code == 200:
-		if response.content:
-			file_doc = frappe.new_doc("File")
-			file_doc.file_name = f"docthumb-{id}.webp"
-			file_doc.attached_to_doctype = 'Paperless Document'
-			file_doc.attached_to_name = docname
-			file_doc.content = response.content
-			file_doc.decode = False
-			file_doc.is_private = False
-			file_doc.insert(ignore_permissions=True)
-			frappe.db.commit()
-			return file_doc.file_url
-	return None
-
-# Get data from paperless-ngx
-def paperless_api(place, id):
-	server_url, api_token = get_paperless_settings()
-	response = requests.get(
-        f"{server_url.rstrip('/')}/api/{place}/{id}/",
-        headers = {
-			"Authorization": f"Token {api_token}",
-			"Content-Type": "application/json"
-		}
-	)
-	if response.status_code == 200:
-		if len(response.json()) > 0:
-			return response.json()
-	return None
-
-
-class PaperlessDocument(Document):
-	pass
-
 
 @frappe.whitelist()
-def button_get_ai(doc):
-	print('Starting function to get ai ...')
-	jobId = frappe.enqueue(
-		'frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.get_ai_data',
-		queue = 'short',
-		now = False,
-		self = doc
-	)
-	return jobId.id
+def call_ai(ai, prompt, doc, background=True):
+    # Universal AI
+    print("Starting function to get ai ...")
+    if background == "false":
+        background = False
+    # Get AI
+    try:
+        doc_ai = frappe.get_doc("AI", ai)
+    except frappe.DoesNotExistError:
+        return "AI not found!"
+    if doc_ai.interface == "openAI":
+        if background:
+            jobId = frappe.enqueue(
+                "frappe_goes_paperless.frappe_goes_paperless.doctype.paperless_document.paperless_document.use_openai",
+                queue="short",
+                now=False,
+                doc=doc,
+                prompt=prompt,
+                ai_config=doc_ai.name,
+                background=True,
+            )
+            return jobId
+        else:
+            do_ai = use_openai(doc, prompt, doc_ai.name, False)
+            if do_ai:
+                return do_ai
 
 
-@frappe.whitelist()
-def job_status(jobid):
-	getStatus = None
-	getJob = [(j.job_id, j.status) for j in frappe.get_all('RQ Job', filters={'job_id': jobid}) if j.job_id == jobid]
-	if len(getJob) > 0:
-		for job_id, status in getJob:
-			if job_id == jobid:
-				getStatus = status
-				break
-	return getStatus
+def use_openai(doc, prompt, ai_name, background=True):
+    print("Initiate get ai data ...")
 
-def get_ai_data(self):
-	print('Initiate get ai data ...')
+    client = OpenAI(api_key=get_ai_settings(ai_name))
+    doc = json.loads(doc)
 
-	client = OpenAI(api_key = get_ai_settings())
-	self = json.loads(self)
-	print(self)
-	print(type(self))
+    # get prompt
+    prompt = frappe.get_doc("AI Prompt", prompt)
+    # check AI mode
+    if prompt.ai_output_mode == "Structured Output (JSON)":
+        effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
+        json_schema = (
+            json.loads(prompt.json_scema)
+            if type(prompt.json_scema) == str
+            else prompt.json_scema
+        )
+        chat_response = client.chat.completions.create(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a wizard that generates invoice details in JSON format.",
+                },
+                {"role": "user", "content": effective_prompt},
+            ],
+            functions=[
+                {
+                    "name": "generate_invoice",
+                    "description": "Generates an invoice based on the provided schema.",
+                    "parameters": json_schema,
+                }
+            ],
+            function_call={"name": "generate_invoice"},
+        )
+        if chat_response.choices:
+            function_call = chat_response.choices[0].message.function_call
+            if function_call:
+                resp = function_call.arguments
+            else:
+                resp = ""
+        else:
+            resp = ""
+    # else if AI mode is Chat or None
+    else:
+        # concat fulltext and prompt
+        effective_prompt = f"{prompt.long_text_fnbe}\n\n{doc.get('document_fulltext')}"
+        # init chat
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": effective_prompt,
+                }
+            ],
+            model="chatgpt-4o-latest",
+        )
+        if chat_completion.choices:
+            resp = chat_completion.choices[0].message.content
+        else:
+            resp = ""
 
-	# get prompt
-	prompt = frappe.get_doc("AI Prompt", self.get('ai_prompt'), fields=['long_text_fnbe'])
-	# concat fulltext and prompt
-	prompt = f"{self.get('document_fulltext')}\n\n{prompt.long_text_fnbe}"
-	# init chat
-	chat_completion = client.chat.completions.create(
-		messages=[
-			{
-				"role": "user",
-				"content": prompt,
-			}
-		],
-		model="chatgpt-4o-latest",
-	)
-	resp = chat_completion.choices[0].message.content.strip()
-	# update doctype
-	doc = frappe.get_doc("Paperless Document", self.get('name'))
-	
-	doc.ai_response = resp
-	json_pattern = r'\{.*\}'
-	matches = re.findall(json_pattern, resp, re.DOTALL)
-	if matches:
-		json_content = matches[0]
-		try:
-			data = json.loads(json_content)
-			formatted_json = json.dumps(data, indent=2)
-			doc.ai_response_json = formatted_json
-		except json.JSONDecodeError as e:
-			doc.ai_response_json = f"Error on decode JSON: {e}"
-	else:
-		doc.ai_response_json = 'The content is not in JSON format'
-	doc.status = 'AI-Response-Recieved'
-	doc.save()
-	frappe.db.commit()
-	frappe.publish_realtime('msgprint_end', 'Response received successfully, fields updated!')
-	print('Response received successfully, fields updated!')
+    # add doctype AI Query
+    new_query = frappe.new_doc("AI Query")
+    new_query.document_type = prompt.for_doctype
+    new_query.paperless_doc = doc.get("name")
+    new_query.ai = ai_name
+    new_query.ai_prompt_template = prompt
+    new_query.effective_prompt = effective_prompt
+    new_query.ai_response = resp.strip() if resp else ""
 
-
-@frappe.whitelist()
-def sync_documents():
-	# Get all ids from paperless
-	ids = get_paperless_ids()
-	# get all ids from frappe
-	docs = frappe.get_all('Paperless Document', fields=['paperless_document_id'])
-	# Get a array with missing ids (compare the two lists of ids)
-	mis = list(set(ids) - set([int(id['paperless_document_id']) for id in docs]))
-	for id in mis:
-		try:
-			get_document = paperless_api('documents', id)
-			# Get frappe doctype by Paperless doctype
-			paperless_doctype = paperless_api('document_types', get_document['document_type'])
-			paperless_doctype = paperless_doctype['name'] if paperless_doctype else None
-			frappe_doctype = frappe.get_all(
-				'Paperless Document Type Mapping',
-				fields = ['frappe_doctype'],
-				filters = {'paperless_document_type': paperless_doctype}
-			)
-			frappe_doctype = frappe_doctype[0]['frappe_doctype'] if len(frappe_doctype) > 0 else None
-			# Get prompt from frappe doctype
-			frappe_prompt = frappe.get_all(
-				'AI Prompt',
-				fields = ['name'],
-				filters = {'for_doctype': frappe_doctype}
-			)
-			frappe_prompt = frappe_prompt[0]['name'] if len(frappe_prompt) > 0 else None
-			# add document
-			new_doc = frappe.new_doc("Paperless Document")
-			new_doc.paperless_document_id = id
-			new_doc.paperless_correspondent = paperless_api('correspondents', get_document['correspondent'])['name']
-			new_doc.paperless_documenttype = paperless_doctype
-			new_doc.status = "new"
-			new_doc.frappe_doctype = frappe_doctype
-			new_doc.ai_prompt = frappe_prompt
-			new_doc.document_fulltext = get_document['content']
-			new_doc.save()
-			thumbimage = get_paperless_docthumb(id, new_doc.name)
-			if thumbimage:
-				new_doc.thumbprint = thumbimage
-			new_doc.save()
-			frappe.db.commit()
-			print(f"Document added -> {get_document['title']}")
-		except Exception as e:
-			# Handle HTTP errors
-			msg = f"Failed to fetch documents from Paperless-ngx: {e}"
-			print(msg)
-			frappe.log_error(msg)
+    json_pattern = r"\{.*\}"
+    if resp is not None:
+        matches = re.findall(json_pattern, resp, re.DOTALL)
+    else:
+        matches = []
+    if matches:
+        json_content = matches[0]
+        try:
+            data = json.loads(json_content)
+            formatted_json = json.dumps(data, indent=2)
+            new_query.ai_response_json = formatted_json
+        except json.JSONDecodeError as e:
+            new_query.ai_response_json = f"Error on decode JSON: {e}"
+    else:
+        new_query.ai_response_json = "The content is not in JSON format"
+    # save query ai
+    new_query.save()
+    # Load document paperless and set status
+    doc_paperless = frappe.get_doc("Paperless Document", doc.get("name"))
+    doc_paperless.status = "AI-Response-Recieved"
+    doc_paperless.save()
+    frappe.db.commit()
+    # Return success
+    if background:
+        frappe.publish_realtime(
+            "msgprint_end", "Response received successfully, fields updated!"
+        )
+        return True
+    else:
+        return f'AI query sucessfull. <a href="{frappe.utils.get_url()}/app/ai-query/{new_query.name}">Check out response</a>.'

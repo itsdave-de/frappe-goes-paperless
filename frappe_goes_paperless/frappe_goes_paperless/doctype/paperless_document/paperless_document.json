@@ -11,13 +11,10 @@
   "paperless_documenttype",
   "status",
   "frappe_doctype",
-  "ai_prompt",
   "column_break_wieg",
   "thumbprint",
   "thumbprint_preview",
   "section_break_czaa",
-  "ai_response",
-  "ai_response_json",
   "document_fulltext"
  ],
  "fields": [
@@ -39,26 +36,10 @@
    "label": "Paperless Documenttype"
   },
   {
-   "fieldname": "ai_response",
-   "fieldtype": "Long Text",
-   "label": "AI Response"
-  },
-  {
-   "fieldname": "ai_response_json",
-   "fieldtype": "Long Text",
-   "label": "AI Response JSON"
-  },
-  {
    "fieldname": "frappe_doctype",
    "fieldtype": "Link",
    "label": "Frappe Doctype",
    "options": "DocType"
-  },
-  {
-   "fieldname": "ai_prompt",
-   "fieldtype": "Link",
-   "label": "AI Prompt",
-   "options": "AI Prompt"
   },
   {
    "fieldname": "status",
@@ -94,7 +75,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-16 13:46:14.209323",
+ "modified": "2024-09-23 15:09:07.338292",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
