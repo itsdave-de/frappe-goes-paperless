@@ -82,9 +82,6 @@ frappe.ui.form.on("Paperless Document", {
                         // Show the dialog
                         d.show();
                     });
-                } else {
-                    // Hide fields if AI app is not installed
-                    frm.toggle_display(['ai_response', 'ai_response_json'], false);
                 }
             }
         });
