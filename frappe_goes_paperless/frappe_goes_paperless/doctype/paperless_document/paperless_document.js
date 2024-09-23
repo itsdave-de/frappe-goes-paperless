@@ -118,5 +118,15 @@ function verificarStatusJob(jobId, frm) {
 }
 
 function open_document_on_paperless(document_id) {
-    this.window.open('http://10.251.0.55:8000/documents/' + document_id + '/details', '_blank');
+    frappe.call({
+        method: 'frappe.client.get_value',
+        args: {
+            doctype: 'Paperless-ngx Settings',
+            name: 'Paperless-ngx Settings',
+            fieldname: 'paperless_ngx_server'
+        },
+        callback: function (response) {
+            this.window.open(response.paperless_ngx_server.replace(/\/$/, '') + '/documents/' + document_id + '/details', '_blank');
+        }
+    });
 }
