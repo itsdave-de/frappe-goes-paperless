@@ -47,7 +47,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "new\nAI-Response-Recieved"
+   "options": "new\nAI-Response-Received\nWorkflow Successful\nDestination Document Cancelled"
   },
   {
    "fieldname": "column_break_wieg",
@@ -82,7 +82,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-23 21:07:55.297602",
+ "modified": "2024-10-11 15:15:58.492245",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
