@@ -12,7 +12,6 @@ frappe.ui.form.on("Paperless Document", {
                 open_document_on_paperless(frm.doc.paperless_document_id);
             });
         }
-<<<<<<< HEAD
 
         // Add a custom button named "Query AI" if app AI Flow is installed
         frappe.call({
@@ -123,11 +122,6 @@ function verificarStatusJob(jobId, frm) {
     });
 }
 
-=======
-    }
-});
-
->>>>>>> 543cdd8c448b14973cefebdfc768ab1f1fd4d6c1
 function open_document_on_paperless(document_id) {
     frappe.call({
         method: 'frappe.client.get_value',
