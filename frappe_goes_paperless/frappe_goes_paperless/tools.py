@@ -22,6 +22,9 @@ def get_paperless_settings():
 
 def get_paperless_ids():
     server_url, api_token = get_paperless_settings()
+    if not server_url or not api_token:
+        print("Paperless settings not set")
+        return None
     response = requests.get(
         f"{server_url.rstrip('/')}/api/documents/",
         headers={
@@ -37,6 +40,9 @@ def get_paperless_ids():
 
 def get_paperless_fulltext(document_id):
     server_url, api_token = get_paperless_settings()
+    if not server_url or not api_token:
+        print("Paperless settings not set")
+        return None
     response = requests.get(
         f"{server_url.rstrip('/')}/api/documents/{document_id}/",
         headers={
@@ -53,6 +59,9 @@ def get_paperless_fulltext(document_id):
 # Get data from paperless-ngx
 def paperless_api(place, id):
     server_url, api_token = get_paperless_settings()
+    if not server_url or not api_token:
+        print("Paperless settings not set")
+        return None
     response = requests.get(
         f"{server_url.rstrip('/')}/api/{place}/{id}/",
         headers={
@@ -69,6 +78,9 @@ def paperless_api(place, id):
 # Get document thumbprint image
 def get_paperless_docthumb(id, docname):
     server_url, api_token = get_paperless_settings()
+    if not server_url or not api_token:
+        print("Paperless settings not set")
+        return None
     response = requests.get(
         f"{server_url.rstrip('/')}/api/documents/{id}/thumb/",
         headers={"Authorization": f"Token {api_token}"},
