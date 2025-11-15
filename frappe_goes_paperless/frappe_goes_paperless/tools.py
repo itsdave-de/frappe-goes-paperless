@@ -5,6 +5,9 @@ import frappe
 from frappe.utils.password import get_decrypted_password
 import requests
 
+@frappe.whitelist()
+def installed_apps():
+    return ['ai_workflows']
 
 def get_paperless_settings():
     settings = frappe.get_doc("Paperless-ngx Settings", "Paperless-ngx Settings")
