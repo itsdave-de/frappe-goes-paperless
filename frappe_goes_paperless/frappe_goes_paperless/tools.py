@@ -4,6 +4,8 @@
 import frappe
 from frappe.utils.password import get_decrypted_password
 import requests
+import re
+from datetime import date
 
 @frappe.whitelist()
 def installed_apps():
@@ -143,6 +145,10 @@ def sync_documents(paperless_document=None):
             new_doc.status = "new"
             new_doc.frappe_doctype = frappe_doctype
             new_doc.document_fulltext = get_document["content"]
+            # -> Rechnungsdatum aus dem Volltext ziehen
+            invoice_date = extract_invoice_date_from_text(new_doc.document_fulltext)
+            if invoice_date:
+                new_doc.invoice_date = invoice_date
             new_doc.save()
             thumbimage = get_paperless_docthumb(id, new_doc.name)
             if thumbimage:
@@ -171,3 +177,240 @@ def job_status(jobid):
                 getStatus = status
                 break
     return getStatus
+
+# Monatsnamen-Datum parsen
+def parse_date_with_month_name(raw: str):
+    """Versucht Datumsangaben wie '30 Oktober 2025' oder '30 October 2025' zu parsen.
+    Gibt ein date-Objekt oder None zurück.
+    """
+    if not raw:
+        return None
+
+    # alles etwas normalisieren
+    txt = " ".join(raw.replace("\n", " ").split())
+    parts = txt.split(" ")
+    if len(parts) < 3:
+        return None
+
+    # einfache Annahme: <Tag> <Monatsname> <Jahr>
+    # z.B. 30 Oktober 2025 oder 30. Oktober 2025
+    try:
+        day_str = parts[0].rstrip(".")
+        day = int(day_str)
+    except Exception:
+        return None
+
+    # Monatsname kann an zweiter Stelle sein
+    month_word = parts[1].strip().rstrip(".").lower()
+
+    month_map = {
+        # Deutsch
+        "januar": 1, "jan": 1,
+        "februar": 2, "feb": 2,
+        "märz": 3, "maerz": 3, "mrz": 3,
+        "april": 4, "apr": 4,
+        "mai": 5,
+        "juni": 6, "jun": 6,
+        "juli": 7, "jul": 7,
+        "august": 8, "aug": 8,
+        "september": 9, "sept": 9, "sep": 9,
+        "oktober": 10, "okt": 10,
+        "november": 11, "nov": 11,
+        "dezember": 12, "dez": 12,
+        # Englisch (für Sicherheit)
+        "january": 1,
+        "february": 2,
+        "march": 3,
+        "april": 4,
+        "may": 5,
+        "june": 6,
+        "july": 7,
+        "august": 8,
+        "september": 9,
+        "october": 10,
+        "november": 11,
+        "december": 12,
+    }
+
+    month = month_map.get(month_word)
+    if not month:
+        return None
+
+    # Jahr sollte das letzte Element sein
+    try:
+        year = int(parts[-1].rstrip("."))
+    except Exception:
+        return None
+
+    if year < 1900 or year > 2100:
+        return None
+
+    try:
+        return date(year, month, day)
+    except Exception:
+        return None
+
+#Hilfsfunktion: Datum aus Volltext extrahieren
+def extract_invoice_date_from_text(text: str):
+    """Versucht, ein Rechnungs-/Quittungsdatum aus dem Volltext zu holen.
+
+    Strategie:
+    1. Suche nach Keywords wie 'Rechnungsdatum', 'Quittungsdatum' etc. + Datum danach
+    2. Versuche dabei zuerst numerische Datumsformate, dann '30 Oktober 2025' usw.
+    3. Wenn nichts gefunden → global im Text nach dem ersten plausiblen Datum suchen.
+    """
+
+    if not text:
+        return None
+
+    # Normalisieren
+    normalized = " ".join(text.replace("\n", " ").split())
+    lower = normalized.lower()
+
+    # Relevante Keywords, nach denen wir zuerst schauen
+    keywords = [
+        "rechnungsdatum",
+        "quittungsdatum",
+        "invoice date",
+        "belegdatum",
+        "rechnung vom",
+        "datum",
+    ]
+
+    # Muster: numerische Datumsangaben (01.01.2024, 1-1-24, 01/01/2024)
+    numeric_pattern = re.compile(r"(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4})")
+
+    def _is_plausible(d):
+        # hier kannst du den Bereich einschränken, z.B. ab 2015
+        return d and str(d) >= "2015-01-01"
+
+    # 1) Versuche zuerst: Keyword + Datum dahinter
+    for kw in keywords:
+        idx = lower.find(kw)
+        if idx == -1:
+            continue
+
+        # Stück Text nach dem Keyword
+        snippet = normalized[idx:idx + 80]  # 80 Zeichen danach reichen oft
+        snippet_lower = snippet.lower()
+
+        # 1a) Erst numerisches Datum im Snippet versuchen
+        num_matches = numeric_pattern.findall(snippet)
+        for raw in num_matches:
+            try:
+                parsed = frappe.utils.parse_date(raw)
+            except Exception:
+                continue
+            if _is_plausible(parsed):
+                return parsed
+
+        # 1b) Dann Datumsangaben mit Monatsnamen wie '30 Oktober 2025'
+        # Suche 'Zahl Wort Zahl' in dem Ausschnitt
+        word_date_matches = re.findall(r"(\d{1,2}\s+[A-Za-zÄÖÜäöüß\.]+\s+\d{4})", snippet)
+        for raw in word_date_matches:
+            parsed = parse_date_with_month_name(raw)
+            if _is_plausible(parsed):
+                return parsed
+
+    # 2) Fallback: irgendwo im gesamten Text numerische Daten suchen
+    num_matches = numeric_pattern.findall(normalized)
+    for raw in num_matches:
+        try:
+            parsed = frappe.utils.parse_date(raw)
+        except Exception:
+            continue
+        if _is_plausible(parsed):
+            return parsed
+
+    # 3) Fallback: irgendwo '30 Oktober 2025'-artige Daten im gesamten Text
+    word_date_matches = re.findall(r"(\d{1,2}\s+[A-Za-zÄÖÜäöüß\.]+\s+\d{4})", normalized)
+    for raw in word_date_matches:
+        parsed = parse_date_with_month_name(raw)
+        if _is_plausible(parsed):
+            return parsed
+
+    return None
+
+#Backfill-Funktion: alle Dokumente ohne invoice_date nachbearbeiten
+@frappe.whitelist()
+def backfill_paperless_invoice_date(limit=10000):
+    """Setzt invoice_date für Paperless Document anhand von document_fulltext.
+
+    - limit: Anzahl der Dokumente in einem Lauf (Standard 10.000)
+    """
+
+    docs = frappe.get_all(
+        "Paperless Document",
+        filters={"invoice_date": ["is", "not set"]},
+        fields=["name", "document_fulltext"],
+        limit_page_length=limit,
+    )
+
+    updated = 0
+    skipped = 0
+
+    for row in docs:
+        text = row.get("document_fulltext") or ""
+        parsed = extract_invoice_date_from_text(text)
+
+        if not parsed:
+            skipped += 1
+            continue
+
+        doc = frappe.get_doc("Paperless Document", row["name"])
+        doc.invoice_date = parsed
+        doc.save(ignore_permissions=True)
+        updated += 1
+
+    return {
+        "total": len(docs),
+        "updated": updated,
+        "skipped": skipped,
+    }
+
+@frappe.whitelist()
+def backfill_paperless_invoice_date_batch(batch_size=1000, max_batches=0):
+    """Führt backfill_paperless_invoice_date in Batches aus, bis nichts mehr übrig ist
+    oder max_batches erreicht ist.
+
+    - batch_size: Anzahl Dokumente pro Batch
+    - max_batches: 0 = unbegrenzt, sonst Abbruch nach so vielen Batches
+    """
+
+    batch_size = int(batch_size)
+    max_batches = int(max_batches or 0)
+
+    total_seen = 0
+    total_updated = 0
+    total_skipped = 0
+    batch_no = 0
+
+    while True:
+        batch_no += 1
+        res = backfill_paperless_invoice_date(limit=batch_size)
+
+        batch_total = res.get("total") or 0
+        batch_updated = res.get("updated") or 0
+        batch_skipped = res.get("skipped") or 0
+
+        total_seen += batch_total
+        total_updated += batch_updated
+        total_skipped += batch_skipped
+
+        # etwas Feedback in der Console
+        print(f"Batch {batch_no}: total={batch_total}, updated={batch_updated}, skipped={batch_skipped}")
+
+        # wenn weniger als batch_size Dokumente im Batch waren, ist nichts mehr übrig
+        if batch_total < batch_size:
+            break
+
+        # Sicherheitsbremse
+        if max_batches and batch_no >= max_batches:
+            break
+
+    return {
+        "batches": batch_no,
+        "total_seen": total_seen,
+        "total_updated": total_updated,
+        "total_skipped": total_skipped,
+    }

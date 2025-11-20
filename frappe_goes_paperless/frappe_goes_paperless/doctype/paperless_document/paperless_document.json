@@ -12,6 +12,7 @@
   "status",
   "frappe_doctype",
   "frappe_document",
+  "invoice_date",
   "column_break_wieg",
   "thumbprint",
   "thumbprint_preview",
@@ -78,11 +79,16 @@
    "fieldtype": "Dynamic Link",
    "label": "Frappe Document",
    "options": "frappe_doctype"
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Rechnungsdatum"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-11 15:15:58.492245",
+ "modified": "2025-11-20 12:34:18.062319",
  "modified_by": "Administrator",
  "module": "Frappe Goes Paperless",
  "name": "Paperless Document",
