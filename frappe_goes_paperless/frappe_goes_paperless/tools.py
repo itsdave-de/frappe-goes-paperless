@@ -251,13 +251,93 @@ def parse_date_with_month_name(raw: str):
         return None
 
 #Hilfsfunktion: Datum aus Volltext extrahieren
-def extract_invoice_date_from_text(text: str):
-    """Versucht, ein Rechnungs-/Quittungsdatum aus dem Volltext zu holen.
+# def extract_invoice_date_from_text(text: str):
+#     """Versucht, ein Rechnungs-/Quittungsdatum aus dem Volltext zu holen.
 
-    Strategie:
-    1. Suche nach Keywords wie 'Rechnungsdatum', 'Quittungsdatum' etc. + Datum danach
-    2. Versuche dabei zuerst numerische Datumsformate, dann '30 Oktober 2025' usw.
-    3. Wenn nichts gefunden → global im Text nach dem ersten plausiblen Datum suchen.
+#     Strategie:
+#     1. Suche nach Keywords wie 'Rechnungsdatum', 'Quittungsdatum' etc. + Datum danach
+#     2. Versuche dabei zuerst numerische Datumsformate, dann '30 Oktober 2025' usw.
+#     3. Wenn nichts gefunden → global im Text nach dem ersten plausiblen Datum suchen.
+#     """
+
+#     if not text:
+#         return None
+
+#     # Normalisieren
+#     normalized = " ".join(text.replace("\n", " ").split())
+#     lower = normalized.lower()
+
+#     # Relevante Keywords, nach denen wir zuerst schauen
+#     keywords = [
+#         "rechnungsdatum",
+#         "quittungsdatum",
+#         "invoice date",
+#         "belegdatum",
+#         "rechnung vom",
+#         "datum",
+#     ]
+
+#     # Muster: numerische Datumsangaben (01.01.2024, 1-1-24, 01/01/2024)
+#     numeric_pattern = re.compile(r"(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4})")
+
+#     def _is_plausible(d):
+#         # hier kannst du den Bereich einschränken, z.B. ab 2015
+#         return d and str(d) >= "2015-01-01"
+
+#     # 1) Versuche zuerst: Keyword + Datum dahinter
+#     for kw in keywords:
+#         idx = lower.find(kw)
+#         if idx == -1:
+#             continue
+
+#         # Stück Text nach dem Keyword
+#         snippet = normalized[idx:idx + 80]  # 80 Zeichen danach reichen oft
+#         snippet_lower = snippet.lower()
+
+#         # 1a) Erst numerisches Datum im Snippet versuchen
+#         num_matches = numeric_pattern.findall(snippet)
+#         for raw in num_matches:
+#             try:
+#                 parsed = frappe.utils.parse_date(raw)
+#             except Exception:
+#                 continue
+#             if _is_plausible(parsed):
+#                 return parsed
+
+#         # 1b) Dann Datumsangaben mit Monatsnamen wie '30 Oktober 2025'
+#         # Suche 'Zahl Wort Zahl' in dem Ausschnitt
+#         word_date_matches = re.findall(r"(\d{1,2}\s+[A-Za-zÄÖÜäöüß\.]+\s+\d{4})", snippet)
+#         for raw in word_date_matches:
+#             parsed = parse_date_with_month_name(raw)
+#             if _is_plausible(parsed):
+#                 return parsed
+
+#     # 2) Fallback: irgendwo im gesamten Text numerische Daten suchen
+#     num_matches = numeric_pattern.findall(normalized)
+#     for raw in num_matches:
+#         try:
+#             parsed = frappe.utils.parse_date(raw)
+#         except Exception:
+#             continue
+#         if _is_plausible(parsed):
+#             return parsed
+
+#     # 3) Fallback: irgendwo '30 Oktober 2025'-artige Daten im gesamten Text
+#     word_date_matches = re.findall(r"(\d{1,2}\s+[A-Za-zÄÖÜäöüß\.]+\s+\d{4})", normalized)
+#     for raw in word_date_matches:
+#         parsed = parse_date_with_month_name(raw)
+#         if _is_plausible(parsed):
+#             return parsed
+
+#     return None
+
+
+
+def extract_invoice_date_from_text(text: str):
+    """Einfache, robuste Datumserkennung für Rechnungen/Quittungen.
+
+    - bevorzugt 'Rechnungsdatum 02.11.2020'
+    - unterstützt dd.mm.yyyy, dd-mm-yyyy, dd/mm/yyyy, ISO und Monatsnamen
     """
 
     if not text:
@@ -267,7 +347,7 @@ def extract_invoice_date_from_text(text: str):
     normalized = " ".join(text.replace("\n", " ").split())
     lower = normalized.lower()
 
-    # Relevante Keywords, nach denen wir zuerst schauen
+    # Relevante Keywords
     keywords = [
         "rechnungsdatum",
         "quittungsdatum",
@@ -277,74 +357,120 @@ def extract_invoice_date_from_text(text: str):
         "datum",
     ]
 
-    # Muster: numerische Datumsangaben (01.01.2024, 1-1-24, 01/01/2024)
-    numeric_pattern = re.compile(r"(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4})")
+    # Muster
+    numeric_pattern = re.compile(r"(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{4})")   # 02.11.2020, 02-11-2020
+    iso_pattern = re.compile(r"(\d{4}-\d{2}-\d{2})")                     # 2020-11-02
+    word_pattern = re.compile(r"(\d{1,2}\s+[A-Za-zÄÖÜäöüß\.]+\s+\d{4})") # 30 Oktober 2025
 
     def _is_plausible(d):
-        # hier kannst du den Bereich einschränken, z.B. ab 2015
-        return d and str(d) >= "2015-01-01"
+        return d and str(d) >= "2010-01-01"
 
-    # 1) Versuche zuerst: Keyword + Datum dahinter
+    def _parse_loose(raw: str):
+        """Versuch 1: frappe.utils.parse_date, Versuch 2: dd.mm.yyyy selber parsen."""
+        if not raw:
+            return None
+
+        # Erst Frappe probieren
+        try:
+            d = frappe.utils.parse_date(raw)
+            if d:
+                return d
+        except Exception:
+            pass
+
+        # Dann dd.mm.yyyy / dd-mm-yyyy / dd/mm/yyyy selbst parsen
+        sep = "." if "." in raw else "-" if "-" in raw else "/" if "/" in raw else None
+        if not sep:
+            return None
+
+        try:
+            day, month, year = raw.split(sep)
+            day = int(day)
+            month = int(month)
+            year = int(year)
+            if year < 2000 or year > 2100:
+                return None
+            return date(year, month, day)
+        except Exception:
+            return None
+
+    # 1) Keyword + Datum dahinter
     for kw in keywords:
         idx = lower.find(kw)
         if idx == -1:
             continue
 
-        # Stück Text nach dem Keyword
-        snippet = normalized[idx:idx + 80]  # 80 Zeichen danach reichen oft
-        snippet_lower = snippet.lower()
+        snippet = normalized[idx:idx + 150]
 
-        # 1a) Erst numerisches Datum im Snippet versuchen
-        num_matches = numeric_pattern.findall(snippet)
-        for raw in num_matches:
-            try:
-                parsed = frappe.utils.parse_date(raw)
-            except Exception:
-                continue
+        # 1a) numerisch
+        for raw in numeric_pattern.findall(snippet):
+            parsed = _parse_loose(raw)
             if _is_plausible(parsed):
                 return parsed
 
-        # 1b) Dann Datumsangaben mit Monatsnamen wie '30 Oktober 2025'
-        # Suche 'Zahl Wort Zahl' in dem Ausschnitt
-        word_date_matches = re.findall(r"(\d{1,2}\s+[A-Za-zÄÖÜäöüß\.]+\s+\d{4})", snippet)
-        for raw in word_date_matches:
+        # 1b) ISO
+        for raw in iso_pattern.findall(snippet):
+            parsed = _parse_loose(raw)
+            if _is_plausible(parsed):
+                return parsed
+
+        # 1c) Monatsnamen
+        for raw in word_pattern.findall(snippet):
             parsed = parse_date_with_month_name(raw)
             if _is_plausible(parsed):
                 return parsed
 
-    # 2) Fallback: irgendwo im gesamten Text numerische Daten suchen
-    num_matches = numeric_pattern.findall(normalized)
-    for raw in num_matches:
-        try:
-            parsed = frappe.utils.parse_date(raw)
-        except Exception:
-            continue
+    # 2) Fallback: irgendwo im Text numerische Datumsangaben
+    for raw in numeric_pattern.findall(normalized):
+        parsed = _parse_loose(raw)
         if _is_plausible(parsed):
             return parsed
 
-    # 3) Fallback: irgendwo '30 Oktober 2025'-artige Daten im gesamten Text
-    word_date_matches = re.findall(r"(\d{1,2}\s+[A-Za-zÄÖÜäöüß\.]+\s+\d{4})", normalized)
-    for raw in word_date_matches:
+    # 3) Fallback: ISO
+    for raw in iso_pattern.findall(normalized):
+        parsed = _parse_loose(raw)
+        if _is_plausible(parsed):
+            return parsed
+
+    # 4) Fallback: Monatsnamen
+    for raw in word_pattern.findall(normalized):
         parsed = parse_date_with_month_name(raw)
         if _is_plausible(parsed):
             return parsed
 
     return None
 
-#Backfill-Funktion: alle Dokumente ohne invoice_date nachbearbeiten
+
+
 @frappe.whitelist()
-def backfill_paperless_invoice_date(limit=10000):
+def backfill_paperless_invoice_date(limit=10000, docname=None):
     """Setzt invoice_date für Paperless Document anhand von document_fulltext.
 
-    - limit: Anzahl der Dokumente in einem Lauf (Standard 10.000)
+    - limit: Anzahl der Dokumente in einem Lauf (wird nur benutzt, wenn docname nicht gesetzt ist)
+    - docname: wenn gesetzt, wird NUR dieses eine Paperless Document verarbeitet (Debug-Helfer)
     """
 
-    docs = frappe.get_all(
-        "Paperless Document",
-        filters={"invoice_date": ["is", "not set"]},
-        fields=["name", "document_fulltext"],
-        limit_page_length=limit,
-    )
+    docs = []
+
+    if docname:
+        # Nur ein Dokument gezielt bearbeiten
+        row = frappe.db.get_value(
+            "Paperless Document",
+            docname,
+            ["name", "document_fulltext", "invoice_date"],
+            as_dict=True,
+        )
+        if not row:
+            return {"total": 0, "updated": 0, "skipped": 0, "info": f"{docname} nicht gefunden"}
+        docs = [row]
+    else:
+        # Alle ohne gesetztes invoice_date
+        docs = frappe.get_all(
+            "Paperless Document",
+            filters={"invoice_date": ["is", "not set"]},
+            fields=["name", "document_fulltext"],
+            limit_page_length=limit,
+        )
 
     updated = 0
     skipped = 0
@@ -352,6 +478,9 @@ def backfill_paperless_invoice_date(limit=10000):
     for row in docs:
         text = row.get("document_fulltext") or ""
         parsed = extract_invoice_date_from_text(text)
+
+        # Debug-Ausgabe in die Konsole / Log
+        print(f"[backfill] Doc {row['name']}: parsed={parsed}")
 
         if not parsed:
             skipped += 1
@@ -362,11 +491,14 @@ def backfill_paperless_invoice_date(limit=10000):
         doc.save(ignore_permissions=True)
         updated += 1
 
+    frappe.db.commit()
+
     return {
         "total": len(docs),
         "updated": updated,
         "skipped": skipped,
     }
+
 
 @frappe.whitelist()
 def backfill_paperless_invoice_date_batch(batch_size=1000, max_batches=0):
@@ -414,3 +546,4 @@ def backfill_paperless_invoice_date_batch(batch_size=1000, max_batches=0):
         "total_updated": total_updated,
         "total_skipped": total_skipped,
     }
+
