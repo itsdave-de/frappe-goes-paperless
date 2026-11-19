@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.utils.password import get_decrypted_password
+from frappe.utils.synchronization import filelock
 import requests
 import re
 from datetime import date
@@ -92,75 +93,67 @@ def get_paperless_docthumb(id, docname):
 
 @frappe.whitelist()
 def sync_documents(paperless_document=None):
-    # Get all ids from paperless
     if paperless_document:
         ids = [paperless_document]
     else:
         ids = get_paperless_ids()
     if not ids:
         return False
-    # get all ids from frappe
-    docs = frappe.get_all("Paperless Document", fields=["paperless_document_id"])
-    # Get a array with missing ids (compare the two lists of ids)
-    mis = list(
-        set(ids)
-        - set(
-            [
-                int(id["paperless_document_id"])
-                for id in docs
-                if id.get("paperless_document_id") is not None
-            ]
-        )
-    )
-    for id in mis:
+    ids = {int(i) for i in ids}
+    known = {
+        int(i)
+        for i in frappe.get_all("Paperless Document", pluck="paperless_document_id")
+        if i is not None
+    }
+    added = []
+    for id in sorted(ids - known):
         try:
-            get_document = paperless_api("documents", id)
-            if not get_document:
-                continue
-            # Get frappe doctype by Paperless doctype
-            response = paperless_api("document_types", get_document["document_type"])
-            if response is not None:
-                paperless_doctype = response["name"]
-            else:
-                paperless_doctype = None
-            frappe_doctype = frappe.get_all(
-                "Paperless Document Type Mapping",
-                fields=["frappe_doctype"],
-                filters={"paperless_document_type": paperless_doctype},
-            )
-            frappe_doctype = (
-                frappe_doctype[0]["frappe_doctype"] if len(frappe_doctype) > 0 else None
-            )
-
-            # add document
-            new_doc = frappe.new_doc("Paperless Document")
-            new_doc.paperless_document_id = id
-            correspondent = paperless_api(
-                "correspondents", get_document["correspondent"]
-            )
-            new_doc.paperless_correspondent = (
-                correspondent["name"] if correspondent else None
-            )
-            new_doc.paperless_documenttype = paperless_doctype
-            new_doc.status = "new"
-            new_doc.frappe_doctype = frappe_doctype
-            new_doc.document_fulltext = get_document["content"]
-            # -> Rechnungsdatum aus dem Volltext ziehen
-            invoice_date = extract_invoice_date_from_text(new_doc.document_fulltext)
-            if invoice_date:
-                new_doc.invoice_date = invoice_date
-            new_doc.save()
-            thumbimage = get_paperless_docthumb(id, new_doc.name)
-            if thumbimage:
-                new_doc.thumbprint = thumbimage
-            new_doc.save()
-            frappe.db.commit()
-            print(f"Document added -> {get_document['title']}")
+            with filelock("paperless_sync", timeout=120):
+                frappe.db.rollback()
+                if frappe.db.exists("Paperless Document", {"paperless_document_id": id}):
+                    continue
+                if import_document(id):
+                    added.append(id)
         except Exception as e:
-            # Handle HTTP errors
+            frappe.db.rollback()
             msg = f"Failed to fetch documents from Paperless-ngx: {e}"
             print(msg)
             frappe.log_error(msg)
+    return added
+
+
+def import_document(id):
+    get_document = paperless_api("documents", id)
+    if not get_document:
+        return None
+    response = paperless_api("document_types", get_document["document_type"])
+    paperless_doctype = response["name"] if response is not None else None
+    frappe_doctype = frappe.get_all(
+        "Paperless Document Type Mapping",
+        fields=["frappe_doctype"],
+        filters={"paperless_document_type": paperless_doctype},
+    )
+    frappe_doctype = frappe_doctype[0]["frappe_doctype"] if frappe_doctype else None
+
+    new_doc = frappe.new_doc("Paperless Document")
+    new_doc.paperless_document_id = id
+    correspondent = paperless_api("correspondents", get_document["correspondent"])
+    new_doc.paperless_correspondent = correspondent["name"] if correspondent else None
+    new_doc.paperless_documenttype = paperless_doctype
+    new_doc.status = "new"
+    new_doc.frappe_doctype = frappe_doctype
+    new_doc.document_fulltext = get_document["content"]
+    invoice_date = extract_invoice_date_from_text(new_doc.document_fulltext)
+    if invoice_date:
+        new_doc.invoice_date = invoice_date
+    new_doc.save()
+    thumbimage = get_paperless_docthumb(id, new_doc.name)
+    if thumbimage:
+        new_doc.thumbprint = thumbimage
+    new_doc.save()
+    frappe.db.commit()
+    print(f"Document added -> {get_document['title']}")
+    return new_doc.name
 
 
 @frappe.whitelist()
