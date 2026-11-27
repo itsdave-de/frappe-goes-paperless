@@ -19,17 +19,23 @@ class PaperlessngxSettings(Document):
 
 def get_paperless_settings():
     settings = frappe.get_doc('Paperless-ngx Settings', 'Paperless-ngx Settings')
-    api_token = get_decrypted_password(
-        doctype='Paperless-ngx Settings',
-        name='Paperless-ngx Settings',
-        fieldname='api_token',
-        raise_exception=False
-    )
-    return settings.paperless_ngx_server, api_token
+    if settings:
+        api_token = get_decrypted_password(
+            doctype='Paperless-ngx Settings',
+            name='Paperless-ngx Settings',
+            fieldname='api_token',
+            raise_exception=False
+        )
+        return settings.paperless_ngx_server, api_token
+    else:
+        return None, None
 
 @frappe.whitelist()
 def sync_customers():
     server_url, api_token = get_paperless_settings()
+    if not server_url or not api_token:
+        frappe.msgprint("Paperless settings not set")
+        return
     customers = frappe.get_all('Customer', fields=['name', 'customer_name'])
 
     for customer in customers:
@@ -61,6 +67,9 @@ def sync_customers():
 @frappe.whitelist()
 def sync_suppliers():
     server_url, api_token = get_paperless_settings()
+    if not server_url or not api_token:
+        frappe.msgprint("Paperless settings not set")
+        return
     suppliers = frappe.get_all('Supplier', fields=['name', 'supplier_name'])
 
     for supplier in suppliers:
